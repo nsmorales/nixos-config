@@ -224,6 +224,7 @@ let name = "%NAME%";
 
   ssh = {
     enable = true;
+    enableDefaultConfig = false;
     includes = [
       (lib.mkIf pkgs.stdenv.hostPlatform.isLinux
         "/home/${user}/.ssh/config_external"
@@ -232,14 +233,22 @@ let name = "%NAME%";
         "/Users/${user}/.ssh/config_external"
       )
     ];
-    settings = {
-      SendEnv = "LANG LC_*";
-      HashKnownHosts = true;
+    matchBlocks = {
+      "*" = {
+        sendEnv = [ "LANG" "LC_*" ];
+        hashKnownHosts = true;
+      };
       # Example SSH configuration for GitHub
       # "github.com" = {
-      #   IdentitiesOnly = true;
-      #   IdentityFile = lib.mkIf pkgs.stdenv.hostPlatform.isLinux
-      #     "/home/${user}/.ssh/id_github";
+      #   identitiesOnly = true;
+      #   identityFile = [
+      #     (lib.mkIf pkgs.stdenv.hostPlatform.isLinux
+      #       "/home/${user}/.ssh/id_github"
+      #     )
+      #     (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
+      #       "/Users/${user}/.ssh/id_github"
+      #     )
+      #   ];
       # };
     };
   };
