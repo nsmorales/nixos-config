@@ -1,7 +1,7 @@
 { config, inputs, pkgs, ... }:
 
 let
-  user = "%USER%";
+  user = "nmorales";
   sshKeys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOk8iAnIaa1deoc7jw8YACPNVka1ZFJxhnU4G74TmS+p"
   ];
@@ -30,13 +30,9 @@ in {
   # Set your time zone.
   time.timeZone = "America/New_York";
 
-  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
-  # Per-interface useDHCP will be mandatory in the future, so this generated config
-  # replicates the default behaviour.
   networking = {
-    hostName = "%HOST%"; # Define your hostname.
-    useDHCP = false;
-    interfaces."%INTERFACE%".useDHCP = true;
+    hostName = "%HOST%";
+    networkmanager.enable = true;
   };
 
   # Turn on flag for proprietary software
@@ -55,7 +51,6 @@ in {
     '';
   };
 
-  # Manages keys and such
   programs = {
     gnupg.agent.enable = true;
 
@@ -64,50 +59,43 @@ in {
 
     # My shell
     zsh.enable = true;
+
+    # Hyprland compositor
+    hyprland = {
+      enable = true;
+      xwayland.enable = true;
+    };
+  };
+
+  # XDG portal for Hyprland (screen share, file picker, etc.)
+  xdg.portal = {
+    enable = true;
+    extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
   };
 
   services = {
-    # Fallback console on tty1: auto-login your user
-    getty.autologinUser = user;
-    getty.autologinOnce = false;
-
-    # Display manager & X server
-    displayManager.defaultSession = "none+bspwm";
-    xserver = {
+    # Display manager: greetd + tuigreet
+    greetd = {
       enable = true;
-
-      # Uncomment these for AMD or Nvidia GPU
-      # boot.initrd.kernelModules = [ "amdgpu" ];
-      # videoDrivers = [ "amdgpu" ];
-      # videoDrivers = [ "nvidia" ];
-
-      # Uncomment for Nvidia GPU
-      # This helps fix tearing of windows for Nvidia cards
-      # screenSection = ''
-      #   Option       "metamodes" "nvidia-auto-select +0+0 {ForceFullCompositionPipeline=On}"
-      #   Option       "AllowIndirectGLXProtocol" "off"
-      #   Option       "TripleBuffer" "on"
-      # '';
-
-      displayManager = {
-        lightdm = {
-          enable = true;
-          greeters.slick.enable = true;
-          background = ../../modules/nixos/config/login-wallpaper.png;
+      settings = {
+        default_session = {
+          command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd Hyprland";
+          user = "greeter";
         };
       };
-
-      # Tiling window manager
-      windowManager.bspwm = {
-        enable = true;
-      };
-
-      xkb = {
-        # Turn Caps Lock into Ctrl
-        layout = "us";
-        options = "ctrl:nocaps";
-      };
     };
+
+    # PipeWire for audio
+    pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+      jack.enable = true;
+    };
+
+    # Bluetooth
+    blueman.enable = true;
 
     # Better support for general peripherals
     libinput.enable = true;
@@ -136,127 +124,26 @@ in {
     # Enable CUPS to print documents
     # printing.enable = true;
     # printing.drivers = [ pkgs.brlaser ]; # Brother printer driver
-
-    # Picom, my window compositor with fancy effects
-    #
-    # Notes on writing exclude rules:
-    #
-    #   class_g looks up index 1 in WM_CLASS value for an application
-    #   class_i looks up index 0
-    #
-    #   To find the value for a specific application, use `xprop` at the
-    #   terminal and then click on a window of the application in question
-    #
-    picom = {
-      enable = true;
-      settings = {
-        animations = true;
-        animation-stiffness = 300.0;
-        animation-dampening = 35.0;
-        animation-clamping = false;
-        animation-mass = 1;
-        animation-for-workspace-switch-in = "auto";
-        animation-for-workspace-switch-out = "auto";
-        animation-for-open-window = "slide-down";
-        animation-for-menu-window = "none";
-        animation-for-transient-window = "slide-down";
-        corner-radius = 12;
-        rounded-corners-exclude = [
-          "class_i = 'polybar'"
-          "class_g = 'i3lock'"
-        ];
-        round-borders = 3;
-        round-borders-exclude = [];
-        round-borders-rule = [];
-        shadow = true;
-        shadow-radius = 8;
-        shadow-opacity = 0.4;
-        shadow-offset-x = -8;
-        shadow-offset-y = -8;
-        fading = false;
-        inactive-opacity = 0.8;
-        frame-opacity = 0.7;
-        inactive-opacity-override = false;
-        active-opacity = 1.0;
-        focus-exclude = [
-        ];
-
-        opacity-rule = [
-          "100:class_g = 'i3lock'"
-          "60:class_g = 'Dunst'"
-          "100:class_g = 'Alacritty' && focused"
-          "90:class_g = 'Alacritty' && !focused"
-        ];
-
-        blur-kern = "3x3box";
-        blur = {
-          method = "kernel";
-          strength = 8;
-          background = false;
-          background-frame = false;
-          background-fixed = false;
-          kern = "3x3box";
-        };
-
-        shadow-exclude = [
-          "class_g = 'Dunst'"
-        ];
-
-        blur-background-exclude = [
-          "class_g = 'Dunst'"
-        ];
-
-        backend = "glx";
-        vsync = false;
-        mark-wmwin-focused = true;
-        mark-ovredir-focused = true;
-        detect-rounded-corners = true;
-        detect-client-opacity = false;
-        detect-transient = true;
-        detect-client-leader = true;
-        use-damage = true;
-        log-level = "info";
-
-        wintypes = {
-          normal = { fade = true; shadow = false; };
-          tooltip = { fade = true; shadow = false; opacity = 0.75; focus = true; full-shadow = false; };
-          dock = { shadow = false; };
-          dnd = { shadow = false; };
-          popup_menu = { opacity = 1.0; };
-          dropdown_menu = { opacity = 1.0; };
-        };
-      };
-    };
-
-    gvfs.enable = true; # Mount, trash, and other functionalities
-    tumbler.enable = true; # Thumbnail support for images
-
-    # Emacs runs as a daemon
-    #emacs = {
-    #  enable = true;
-    #  package = pkgs.emacs-unstable;
-    #};
   };
 
-  # When emacs builds from no cache, it exceeds the 90s timeout default
-  systemd.user.services.emacs = {
-    serviceConfig.TimeoutStartSec = "7min";
-  };
-
-  # Enable sound
-  # sound.enable = true;
-
-  # Video support
+  # Disable PulseAudio (we use PipeWire)
   hardware = {
     graphics.enable = true;
-    # pulseaudio.enable = true;
-    # hardware.nvidia.modesetting.enable = true;
-
-    # Enable Xbox support
-    # hardware.xone.enable = true;
+    bluetooth = {
+      enable = true;
+      powerOnBoot = true;
+    };
+    # Uncomment for AMD GPU
+    # hardware.amdgpu.enable = true;
 
     # Crypto wallet support
     ledger.enable = true;
+  };
+
+  # Security: PAM for Hyprlock screen locker
+  security = {
+    pam.services.hyprlock = {};
+    rtkit.enable = true; # Required for PipeWire real-time priority
   };
 
   # Add docker daemon
@@ -272,8 +159,12 @@ in {
     ${user} = {
       isNormalUser = true;
       extraGroups = [
-        "wheel" # Enable ‘sudo’ for the user.
+        "wheel"    # Enable 'sudo' for the user
         "docker"
+        "networkmanager"
+        "video"
+        "audio"
+        "input"
       ];
       shell = pkgs.zsh;
       openssh.authorizedKeys.keys = sshKeys;
@@ -300,18 +191,19 @@ in {
 
   fonts.packages = with pkgs; [
     dejavu_fonts
-    emacs-all-the-icons-fonts
-    feather-font # from overlay
     jetbrains-mono
     font-awesome
     noto-fonts
     noto-fonts-color-emoji
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.noto
   ];
 
   environment.systemPackages = with pkgs; [
     gitFull
     inetutils
+    greetd.tuigreet
   ];
 
-  system.stateVersion = "21.05"; # Don't change this
+  system.stateVersion = "25.05";
 }

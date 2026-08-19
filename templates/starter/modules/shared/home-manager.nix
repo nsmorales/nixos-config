@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 
 let name = "%NAME%";
-    user = "%USER%";
+    user = "nmorales";
     email = "%EMAIL%"; in
 {
   # Shared shell configuration
@@ -35,14 +35,9 @@ let name = "%NAME%";
       # Remove history data we don't want to see
       export HISTIGNORE="pwd:ls:cd"
 
-      # Emacs is my editor
-      export ALTERNATE_EDITOR=""
-      export EDITOR="emacsclient -t"
-      export VISUAL="emacsclient -c -a emacs"
-
-      e() {
-          emacsclient -t "$@"
-      }
+      # Editor
+      export EDITOR="nvim"
+      export VISUAL="nvim"
 
       # nix shortcuts
       shell() {
@@ -68,7 +63,7 @@ let name = "%NAME%";
       user.email = email;
       init.defaultBranch = "main";
       core = {
-	    editor = "vim";
+        editor = "nvim";
         autocrlf = "input";
       };
       pull.rebase = true;
@@ -185,69 +180,45 @@ let name = "%NAME%";
       let g:airline_theme='bubblegum'
       let g:airline_powerline_fonts = 1
       '';
-     };
+    };
 
-  alacritty = {
+  ghostty = {
     enable = true;
     settings = {
-      cursor = {
-        style = "Block";
-      };
+      font-family = "JetBrainsMono Nerd Font";
+      font-size = lib.mkMerge [
+        (lib.mkIf pkgs.stdenv.hostPlatform.isLinux 11)
+        (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin 14)
+      ];
+      window-decoration = false;
+      cursor-style = "block";
+      background-opacity = 0.95;
+      background = "#1f2528";
+      foreground = "#c0c5ce";
 
-      window = {
-        opacity = 1.0;
-        padding = {
-          x = 24;
-          y = 24;
-        };
-      };
+      # Padding
+      window-padding-x = 16;
+      window-padding-y = 16;
 
-      # Fix for shell path when launching from desktop
-      # When launching from desktop, $SHELL may point to /bin/zsh instead of
-      # the Nix-managed shell, causing environment issues
-      terminal.shell = {
-        program = "${pkgs.zsh}/bin/zsh";
-      };
-
-      font = {
-        normal = {
-          family = "MesloLGS NF";
-          style = "Regular";
-        };
-        size = lib.mkMerge [
-          (lib.mkIf pkgs.stdenv.hostPlatform.isLinux 10)
-          (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin 14)
-        ];
-      };
-
-      colors = {
-        primary = {
-          background = "0x1f2528";
-          foreground = "0xc0c5ce";
-        };
-
-        normal = {
-          black = "0x1f2528";
-          red = "0xec5f67";
-          green = "0x99c794";
-          yellow = "0xfac863";
-          blue = "0x6699cc";
-          magenta = "0xc594c5";
-          cyan = "0x5fb3b3";
-          white = "0xc0c5ce";
-        };
-
-        bright = {
-          black = "0x65737e";
-          red = "0xec5f67";
-          green = "0x99c794";
-          yellow = "0xfac863";
-          blue = "0x6699cc";
-          magenta = "0xc594c5";
-          cyan = "0x5fb3b3";
-          white = "0xd8dee9";
-        };
-      };
+      # Colors — base16 Ocean
+      palette = [
+        "0=#1f2528"
+        "1=#ec5f67"
+        "2=#99c794"
+        "3=#fac863"
+        "4=#6699cc"
+        "5=#c594c5"
+        "6=#5fb3b3"
+        "7=#c0c5ce"
+        "8=#65737e"
+        "9=#ec5f67"
+        "10=#99c794"
+        "11=#fac863"
+        "12=#6699cc"
+        "13=#c594c5"
+        "14=#5fb3b3"
+        "15=#d8dee9"
+      ];
     };
   };
 
@@ -264,7 +235,6 @@ let name = "%NAME%";
     ];
     matchBlocks = {
       "*" = {
-        # Set the default values we want to keep
         sendEnv = [ "LANG" "LC_*" ];
         hashKnownHosts = true;
       };

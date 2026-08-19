@@ -2,7 +2,6 @@
 
 with pkgs; [
   # General packages for development and system management
-  alacritty
   bash-completion
   bat
   btop
@@ -12,6 +11,7 @@ with pkgs; [
   sqlite
   wget
   zip
+  unzip
 
   # Encryption and security tools
   age
@@ -21,39 +21,48 @@ with pkgs; [
   docker
   docker-compose
 
-  # Media-related packages
-  emacs-all-the-icons-fonts
+  # Fonts
   dejavu_fonts
-  fd
   font-awesome
   hack-font
   noto-fonts
   noto-fonts-color-emoji
   meslo-lgs-nf
+  jetbrains-mono
+  nerd-fonts.jetbrains-mono
+  nerd-fonts.noto
 
   # Node.js development tools
   nodejs_24
 
   # Text and terminal utilities
+  ghostty
   htop
-  jetbrains-mono
   jq
+  neovim
   ripgrep
   tree
   tmux
-  unzip
-  zsh-powerlevel10k
-  
+
+  # Wayland / clipboard
+  wl-clipboard
+
   # Development tools
   curl
+  fd
+  fzf
   gh
+  lazygit
+  direnv
+
+  # Shell
+  zsh-powerlevel10k
+
+  # Cloud / DevOps
   terraform
   kubectl
   awscli2
-  lazygit
-  fzf
-  direnv
-  
+
   # Programming languages and runtimes
   go
   rustc

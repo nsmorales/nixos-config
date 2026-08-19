@@ -13,45 +13,45 @@ shared-packages ++ [
   cmake
   home-manager
 
-  # Media and design tools
+  # Fonts
   fontconfig
 
-  # Productivity tools
-
   # Audio tools
-  pavucontrol # Pulse audio controls
+  pavucontrol    # Volume/audio control GUI
+  playerctl      # Media player control (play/pause/next/prev)
+  brightnessctl  # Screen brightness control
 
-  # Testing and development tools
-  rofi
-  rofi-calc
-  libtool # for Emacs vterm
+  # Wayland / display tools
+  grim           # Screenshot tool (Wayland)
+  slurp          # Region selection for screenshots
+  hyprpaper      # Wallpaper daemon for Hyprland
+  hyprlock       # Screen locker for Hyprland
+  wdisplays      # Display configuration GUI (Wayland)
+  wev            # Wayland event viewer (debug input)
+  kanshi         # Automatic display configuration
 
-  # Screenshot and recording tools
-  flameshot
+  # Application launcher & bar
+  wofi
+  waybar
 
-  # Text and terminal utilities
-  tree
-  unixtools.ifconfig
-  unixtools.netstat
-  xclip # For the org-download package in Emacs
-  xwininfo # Provides a cursor to click and learn about windows
-  xrandr
-
-  # File and system utilities
-  inotify-tools # inotifywait, inotifywatch - For file system events
+  # Notifications
   libnotify
-  pcmanfm # File browser
-  sqlite
-  xdg-utils
 
-  # Other utilities
+  # Network manager applet (system tray)
+  networkmanagerapplet
+
+  # File management
+  pcmanfm        # GUI file manager
+  xdg-utils      # xdg-open and friends
+
+  # System utilities
+  inotify-tools  # inotifywait, inotifywatch
+  sqlite
+
+  # Browsers
+  firefox
   google-chrome
 
   # PDF viewer
   zathura
-
-  # Development tools
-  firefox
-  
-  # Music and entertainment
 ]
