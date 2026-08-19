@@ -47,8 +47,6 @@ shared-packages ++ [
   # System utilities
   inotify-tools  # inotifywait, inotifywatch
   sqlite
-  ncurses        # Provides tmux-256color terminfo for true color
-
   # AMD GPU — RADV (Mesa Vulkan driver) is enabled by default via hardware.graphics
 
   # Browsers
