@@ -23,17 +23,18 @@ in {
       efi.canTouchEfiVariables = true;
     };
     initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
-    initrd.kernelModules = [ "amdgpu" ];
+    # amdgpu in initrd disabled — old Trinity APU works better loading it at normal boot
+    # initrd.kernelModules = [ "amdgpu" ];
     kernelPackages = pkgs.linuxPackages_latest;
     kernelModules = [ "uinput" ];
-    # Enable amdgpu for older GCN 1.0 GPUs (HD 7000 series / Trinity APU)
-    # Without these, amdgpu falls back to software rendering
-    kernelParams = [
-      "amdgpu.si_support=1"   # Southern Islands (GCN 1.0)
-      "amdgpu.cik_support=1"  # Sea Islands (GCN 1.1)
-      "radeon.si_support=0"   # Disable radeon for SI to avoid conflict
-      "radeon.cik_support=0"  # Disable radeon for CIK to avoid conflict
-    ];
+    # GCN 1.0 amdgpu support params — disabled for now, caused boot issues
+    # Uncomment if amdgpu is falling back to software rendering
+    # kernelParams = [
+    #   "amdgpu.si_support=1"
+    #   "amdgpu.cik_support=1"
+    #   "radeon.si_support=0"
+    #   "radeon.cik_support=0"
+    # ];
   };
 
   # Set your time zone.
@@ -142,10 +143,8 @@ in {
       enable = true;
       enable32Bit = true; # For 32-bit apps (Steam, Wine, etc.)
     };
-    amdgpu = {
-      initrd.enable = true;  # Early KMS for faster boot / better Wayland startup
-      # opencl.enable = true;  # Not supported on GCN 1.0 (HD 7640G)
-    };
+    # amdgpu early KMS disabled — causes issues on older GCN 1.0 hardware (HD 7640G)
+    # amdgpu.initrd.enable = true;
     bluetooth = {
       enable = true;
       powerOnBoot = true;
