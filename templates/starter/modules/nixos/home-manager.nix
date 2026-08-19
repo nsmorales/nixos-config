@@ -125,71 +125,68 @@ in
         disable_hyprland_logo = true;
       };
 
-      # Key bindings — $mainMod = Super (Windows key)
-      "$mainMod" = "SUPER";
-
       bind = [
         # Applications
-        "$mainMod, Return, exec, ghostty"
-        "$mainMod, Space, exec, wofi --show drun"
-        "$mainMod, E, exec, ghostty -e yazi"
-        "$mainMod, B, exec, firefox"
-        "$mainMod SHIFT, Q, killactive"
-        "$mainMod SHIFT, E, exit"
-        "$mainMod, F, fullscreen, 0"
-        "$mainMod SHIFT, F, togglefloating"
-        "$mainMod, P, pseudo"
-        "$mainMod, J, togglesplit"
+        "SUPER, Return, exec, ghostty"
+        "SUPER, Space, exec, wofi --show drun"
+        "SUPER, E, exec, ghostty -e yazi"
+        "SUPER, B, exec, firefox"
+        "SUPER SHIFT, Q, killactive"
+        "SUPER SHIFT, E, exit"
+        "SUPER, F, fullscreen, 0"
+        "SUPER SHIFT, F, togglefloating"
+        "SUPER, P, pseudo"
+        "SUPER, J, togglesplit"
 
         # Screenshot
         ", Print, exec, grim -g \"$(slurp)\" - | wl-copy"
-        "$mainMod SHIFT, S, exec, grim -g \"$(slurp)\" ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"
+        "SUPER SHIFT, S, exec, grim -g \"$(slurp)\" ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"
 
         # Focus movement (vim-style)
-        "$mainMod, H, movefocus, l"
-        "$mainMod, L, movefocus, r"
-        "$mainMod, K, movefocus, u"
-        "$mainMod, J, movefocus, d"
+        "SUPER, H, movefocus, l"
+        "SUPER, L, movefocus, r"
+        "SUPER, K, movefocus, u"
+        "SUPER, J, movefocus, d"
 
         # Window movement
-        "$mainMod SHIFT, H, movewindow, l"
-        "$mainMod SHIFT, L, movewindow, r"
-        "$mainMod SHIFT, K, movewindow, u"
-        "$mainMod SHIFT, J, movewindow, d"
+        "SUPER SHIFT, H, movewindow, l"
+        "SUPER SHIFT, L, movewindow, r"
+        "SUPER SHIFT, K, movewindow, u"
+        "SUPER SHIFT, J, movewindow, d"
 
         # Workspaces
-        "$mainMod, 1, workspace, 1"
-        "$mainMod, 2, workspace, 2"
-        "$mainMod, 3, workspace, 3"
-        "$mainMod, 4, workspace, 4"
-        "$mainMod, 5, workspace, 5"
-        "$mainMod, 6, workspace, 6"
-        "$mainMod, 7, workspace, 7"
-        "$mainMod, 8, workspace, 8"
-        "$mainMod, 9, workspace, 9"
-        "$mainMod, 0, workspace, 10"
+        "SUPER, 1, workspace, 1"
+        "SUPER, 2, workspace, 2"
+        "SUPER, 3, workspace, 3"
+        "SUPER, 4, workspace, 4"
+        "SUPER, 5, workspace, 5"
+        "SUPER, 6, workspace, 6"
+        "SUPER, 7, workspace, 7"
+        "SUPER, 8, workspace, 8"
+        "SUPER, 9, workspace, 9"
+        "SUPER, 0, workspace, 10"
 
         # Move window to workspace
-        "$mainMod SHIFT, 1, movetoworkspace, 1"
-        "$mainMod SHIFT, 2, movetoworkspace, 2"
-        "$mainMod SHIFT, 3, movetoworkspace, 3"
-        "$mainMod SHIFT, 4, movetoworkspace, 4"
-        "$mainMod SHIFT, 5, movetoworkspace, 5"
-        "$mainMod SHIFT, 6, movetoworkspace, 6"
-        "$mainMod SHIFT, 7, movetoworkspace, 7"
-        "$mainMod SHIFT, 8, movetoworkspace, 8"
-        "$mainMod SHIFT, 9, movetoworkspace, 9"
-        "$mainMod SHIFT, 0, movetoworkspace, 10"
+        "SUPER SHIFT, 1, movetoworkspace, 1"
+        "SUPER SHIFT, 2, movetoworkspace, 2"
+        "SUPER SHIFT, 3, movetoworkspace, 3"
+        "SUPER SHIFT, 4, movetoworkspace, 4"
+        "SUPER SHIFT, 5, movetoworkspace, 5"
+        "SUPER SHIFT, 6, movetoworkspace, 6"
+        "SUPER SHIFT, 7, movetoworkspace, 7"
+        "SUPER SHIFT, 8, movetoworkspace, 8"
+        "SUPER SHIFT, 9, movetoworkspace, 9"
+        "SUPER SHIFT, 0, movetoworkspace, 10"
 
         # Scroll through workspaces
-        "$mainMod, mouse_down, workspace, e+1"
-        "$mainMod, mouse_up, workspace, e-1"
+        "SUPER, mouse_down, workspace, e+1"
+        "SUPER, mouse_up, workspace, e-1"
       ];
 
       # Mouse binds
       bindm = [
-        "$mainMod, mouse:272, movewindow"
-        "$mainMod, mouse:273, resizewindow"
+        "SUPER, mouse:272, movewindow"
+        "SUPER, mouse:273, resizewindow"
       ];
 
       # Media / volume keys
