@@ -8,8 +8,9 @@ let
 in {
   imports = [
     ./hardware-configuration.nix
-    ../../modules/nixos/disk-config.nix
     ../../modules/shared
+    # disk-config.nix is used only during fresh installs via the install script (disko).
+    # Do not import it here — it conflicts with hardware-configuration.nix on running systems.
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -80,7 +81,7 @@ in {
       enable = true;
       settings = {
         default_session = {
-          command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd Hyprland";
+          command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd Hyprland";
           user = "greeter";
         };
       };
@@ -203,7 +204,7 @@ in {
   environment.systemPackages = with pkgs; [
     gitFull
     inetutils
-    greetd.tuigreet
+    tuigreet
   ];
 
   system.stateVersion = "26.05";
