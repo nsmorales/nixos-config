@@ -30,7 +30,7 @@ in {
   time.timeZone = "America/New_York";
 
   networking = {
-    hostName = "%HOST%";
+    hostName = "nixos";
     networkmanager.enable = true;
   };
 
