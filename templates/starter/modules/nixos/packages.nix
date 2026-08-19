@@ -48,6 +48,7 @@ shared-packages ++ [
   inotify-tools  # inotifywait, inotifywatch
   sqlite
   # AMD GPU — RADV (Mesa Vulkan driver) is enabled by default via hardware.graphics
+  mesa                # OpenGL implementation (radeonsi for GCN 1.0+)
 
   # Browsers
   firefox
