@@ -218,8 +218,10 @@ in
     };
   };
 
+  programs = shared-programs // {
+
   # Waybar
-  programs.waybar = {
+  waybar = {
     enable = true;
     settings = [{
       layer = "top";
@@ -368,7 +370,7 @@ in
   };
 
   # wofi launcher
-  programs.wofi = {
+  wofi = {
     enable = true;
     settings = {
       width = 600;
@@ -431,6 +433,8 @@ in
       }
     '';
   };
+
+  }; # end programs
 
   # Dunst notification daemon (Wayland compatible)
   services.dunst = {
@@ -497,5 +501,4 @@ in
     tray = "auto";
   };
 
-  programs = shared-programs // {};
 }
