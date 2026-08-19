@@ -43,11 +43,11 @@ in
 
       # Autostart
       exec-once = [
-        "waybar"
-        "hyprpaper"
-        "dunst"
-        "udiskie --tray"
-        "nm-applet --indicator"
+        "${pkgs.waybar}/bin/waybar"
+        "${pkgs.hyprpaper}/bin/hyprpaper"
+        "${pkgs.dunst}/bin/dunst"
+        "${pkgs.udiskie}/bin/udiskie --tray"
+        "${pkgs.networkmanagerapplet}/bin/nm-applet --indicator"
       ];
 
       # Environment variables for Wayland compatibility
@@ -61,6 +61,8 @@ in
         "XDG_CURRENT_DESKTOP,Hyprland"
         "XDG_SESSION_TYPE,wayland"
         "XDG_SESSION_DESKTOP,Hyprland"
+        # Ensure Nix profile binaries are in PATH for exec binds
+        "PATH,$HOME/.nix-profile/bin:/etc/profiles/per-user/nmorales/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:$PATH"
       ];
 
       input = {
@@ -130,9 +132,9 @@ in
 
       bind = [
         # Applications
-        "SUPER, Return, exec, ghostty"
-        "SUPER, Space, exec, wofi --show drun"
-        "SUPER, E, exec, ghostty -e yazi"
+        "SUPER, Return, exec, ${pkgs.ghostty}/bin/ghostty"
+        "SUPER, Space, exec, ${pkgs.wofi}/bin/wofi --show drun"
+        "SUPER, E, exec, ${pkgs.ghostty}/bin/ghostty -e ${pkgs.yazi}/bin/yazi"
         "SUPER, B, exec, firefox"
         "SUPER SHIFT, Q, killactive"
         "SUPER SHIFT, E, exit"

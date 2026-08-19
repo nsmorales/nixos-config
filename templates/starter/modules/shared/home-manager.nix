@@ -248,9 +248,11 @@ let name = "%NAME%";
       window-padding-x = 16;
       window-padding-y = 16;
 
-      # Auto-attach to tmux on launch:
-      # Lists sessions, prompts for one (default: "default"), attaches or creates it.
-      command = "${pkgs.zsh}/bin/zsh -c 'if [ -z \"$TMUX\" ]; then tmux ls 2>/dev/null && read tmux_session && tmux attach -t \${tmux_session:-default} || tmux new -s \${tmux_session:-default}; else zsh; fi'";
+      # Auto-attach to tmux on launch.
+      # If already inside tmux, just run zsh.
+      # Otherwise: show sessions if any exist, prompt for name, attach or create.
+      command = "${pkgs.zsh}/bin/zsh -c 'if [ -n \"$TMUX\" ]; then exec zsh; fi; tmux ls 2>/dev/null; read tmux_session; exec tmux new-session -A -s \${tmux_session:-default}'";
+      # new-session -A attaches if the session exists, creates it if not — no separate attach needed
 
       # Colors — base16 Ocean
       palette = [

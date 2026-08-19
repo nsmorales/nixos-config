@@ -37,6 +37,7 @@ with pkgs; [
 
   # Text and terminal utilities
   ghostty
+  alacritty  # Backup terminal emulator
   htop
   jq
   neovim
