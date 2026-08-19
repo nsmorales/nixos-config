@@ -7,6 +7,8 @@ let
   ];
 in {
   imports = [
+    ./hardware-configuration.nix
+    ../../modules/nixos/disk-config.nix
     ../../modules/shared
   ];
 
