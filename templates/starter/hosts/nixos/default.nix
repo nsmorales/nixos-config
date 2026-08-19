@@ -7,7 +7,7 @@ let
   ];
 in {
   imports = [
-    ../../modules/nixos/disk-config.nix
+    /etc/nixos/hardware-configuration.nix
     ../../modules/shared
   ];
 
@@ -205,5 +205,5 @@ in {
     greetd.tuigreet
   ];
 
-  system.stateVersion = "25.05";
+  system.stateVersion = "26.05";
 }

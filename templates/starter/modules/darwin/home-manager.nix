@@ -1,7 +1,7 @@
 { config, pkgs, lib, home-manager, ... }:
 
 let
-  user = "%USER%";
+  user = "nmorales";
   # Define the content of your file as a derivation
   myEmacsLauncher = pkgs.writeScript "emacs-launcher.command" ''
     #!/bin/sh
@@ -55,7 +55,7 @@ in
           additionalFiles
           { "emacs-launcher.command".source = myEmacsLauncher; }
         ];
-        stateVersion = "23.11";
+        stateVersion = "26.05";
       };
       programs = {} // import ../shared/home-manager.nix { inherit config pkgs lib; };
 
