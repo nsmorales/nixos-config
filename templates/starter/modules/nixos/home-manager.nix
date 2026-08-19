@@ -62,7 +62,7 @@ in
         "XDG_SESSION_TYPE,wayland"
         "XDG_SESSION_DESKTOP,Hyprland"
         # Ensure Nix profile binaries are in PATH for exec binds
-        "PATH,\$HOME/.nix-profile/bin:/etc/profiles/per-user/nmorales/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:\$PATH"
+        "PATH,$HOME/.nix-profile/bin:/etc/profiles/per-user/nmorales/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:$PATH"
       ];
 
       input = {
