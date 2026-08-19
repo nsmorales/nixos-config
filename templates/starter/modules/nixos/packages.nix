@@ -49,6 +49,9 @@ shared-packages ++ [
   sqlite
   ncurses        # Provides tmux-256color terminfo for true color
 
+  # AMD GPU
+  amdvlk         # AMD Vulkan driver (better Wayland/Hyprland performance)
+
   # Browsers
   firefox
   google-chrome

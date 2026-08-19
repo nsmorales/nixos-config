@@ -23,8 +23,7 @@ in {
       efi.canTouchEfiVariables = true;
     };
     initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
-    # Uncomment for AMD GPU
-    # initrd.kernelModules = [ "amdgpu" ];
+    initrd.kernelModules = [ "amdgpu" ];
     kernelPackages = pkgs.linuxPackages_latest;
     kernelModules = [ "uinput" ];
   };
@@ -131,14 +130,18 @@ in {
 
   # Disable PulseAudio (we use PipeWire)
   hardware = {
-    graphics.enable = true;
+    graphics = {
+      enable = true;
+      enable32Bit = true; # For 32-bit apps (Steam, Wine, etc.)
+    };
+    amdgpu = {
+      initrd.enable = true;  # Early KMS for faster boot / better Wayland startup
+      opencl.enable = true;  # OpenCL compute support
+    };
     bluetooth = {
       enable = true;
       powerOnBoot = true;
     };
-    # Uncomment for AMD GPU
-    # hardware.amdgpu.enable = true;
-
     # Crypto wallet support
     ledger.enable = true;
   };

@@ -248,6 +248,10 @@ let name = "%NAME%";
       window-padding-x = 16;
       window-padding-y = 16;
 
+      # Auto-attach to tmux on launch:
+      # Lists sessions, prompts for one (default: "default"), attaches or creates it.
+      command = "${pkgs.zsh}/bin/zsh -c 'if [ -z \"$TMUX\" ]; then tmux ls 2>/dev/null && read tmux_session && tmux attach -t \${tmux_session:-default} || tmux new -s \${tmux_session:-default}; else zsh; fi'";
+
       # Colors — base16 Ocean
       palette = [
         "0=#1f2528"
