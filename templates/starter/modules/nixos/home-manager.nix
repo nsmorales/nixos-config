@@ -33,6 +33,9 @@ in
   # Hyprland window manager (declarative config via home-manager)
   wayland.windowManager.hyprland = {
     enable = true;
+    # Pin to hyprlang (.conf) format. The new Lua format (default in HM 26.05)
+    # requires a completely different settings syntax — migrate when ready.
+    configType = "hyprlang";
     settings = {
       # Monitor configuration — adjust to your display
       # See: https://wiki.hyprland.org/Configuring/Monitors/
