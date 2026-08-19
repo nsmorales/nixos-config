@@ -81,7 +81,7 @@ in {
       enable = true;
       settings = {
         default_session = {
-          command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd Hyprland";
+          command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd ${pkgs.hyprland}/bin/Hyprland";
           user = "greeter";
         };
       };
@@ -160,9 +160,6 @@ in {
   users.users = {
     ${user} = {
       isNormalUser = true;
-      # Set a temporary initial password so you can log in and run `passwd` to change it.
-      # Remove this line after first login and set a proper password with `passwd`.
-      initialPassword = "changeme";
       extraGroups = [
         "wheel"    # Enable 'sudo' for the user
         "docker"
