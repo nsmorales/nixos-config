@@ -8,6 +8,20 @@ let name = "%NAME%";
   zsh = {
     enable = true;
     autocd = false;
+
+    # oh-my-zsh configuration
+    oh-my-zsh = {
+      enable = true;
+      plugins = [
+        "git"
+        "kubectl"
+        "tmux"
+      ];
+      # Theme is handled by powerlevel10k below
+      theme = "";
+    };
+
+    # Additional plugins not in oh-my-zsh
     plugins = [
       {
         name = "powerlevel10k";
@@ -19,6 +33,16 @@ let name = "%NAME%";
         src = lib.cleanSource ./config;
         file = "p10k.zsh";
       }
+      {
+        name = "zsh-syntax-highlighting";
+        src = pkgs.zsh-syntax-highlighting;
+        file = "share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh";
+      }
+      {
+        name = "zsh-autosuggestions";
+        src = pkgs.zsh-autosuggestions;
+        file = "share/zsh-autosuggestions/zsh-autosuggestions.zsh";
+      }
     ];
 
     initContent = lib.mkBefore ''
@@ -27,7 +51,7 @@ let name = "%NAME%";
         . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
       fi
 
-      # Define variables for directories
+      # PATH additions
       export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
       export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
       export PATH=$HOME/.local/share/bin:$PATH
@@ -44,11 +68,35 @@ let name = "%NAME%";
           nix-shell '<nixpkgs>' -A "$1"
       }
 
-      # Use difftastic, syntax-aware diffing
-      alias diff=difft
-
       # Always color ls and group directories
       alias ls='ls --color=auto'
+
+      # Kubernetes aliases
+      alias k="kubectl"
+      alias kctx="kubectl ctx"
+      alias kns="kubens"
+      alias kdcj='kubectl describe cronjob'
+      alias kdd='kubectl describe deployment'
+      alias kdj='kubectl describe job'
+      alias kdp='kubectl describe pod'
+      alias kex='kubectl exec -ti'
+      alias kgcj='kubectl get cronjob'
+      alias kgd='kubectl get deployment'
+      alias kge='kubectl get events --sort-by=.metadata.creationTimestamp'
+      alias kgew='kubectl get events --watch'
+      alias kgj='kubectl get job'
+      alias kgp='kubectl get pod'
+      alias kgs='kubectl get secret'
+      alias klf='kubectl logs -f'
+      alias klfa='kubectl logs -f --all-containers=true --since=10m'
+      alias krr="kubectl rollout restart"
+
+      kgpe() {
+        kubectl get events --field-selector involvedObject.name="$1"
+      }
+
+      # K8s editor
+      export KUBE_EDITOR=nvim
     '';
   };
 
@@ -259,81 +307,98 @@ let name = "%NAME%";
       vim-tmux-navigator
       sensible
       yank
-      prefix-highlight
+      dracula
       {
-        plugin = power-theme;
-        extraConfig = ''
-           set -g @tmux_power_theme 'gold'
-        '';
-      }
-      {
-        plugin = resurrect; # Used by tmux-continuum
-
-        # Use XDG data directory
-        # https://github.com/tmux-plugins/tmux-resurrect/issues/348
+        plugin = resurrect;
         extraConfig = ''
           set -g @resurrect-dir '$HOME/.cache/tmux/resurrect'
           set -g @resurrect-capture-pane-contents 'on'
-          set -g @resurrect-pane-contents-area 'visible'
         '';
       }
       {
         plugin = continuum;
         extraConfig = ''
           set -g @continuum-restore 'on'
-          set -g @continuum-save-interval '5' # minutes
+          set -g @continuum-save-interval '5'
         '';
       }
     ];
-    terminal = "screen-256color";
-    prefix = "C-x";
+    terminal = "xterm-256color";
+    prefix = "C-Space";
     escapeTime = 10;
     historyLimit = 50000;
     extraConfig = ''
-      # Remove Vim mode delays
+      # True color support
+      set-option -sa terminal-overrides ",xterm*:Tc"
+
+      # Focus events for terminals that support them
       set -g focus-events on
 
-      # Enable full mouse support
+      # Mouse support
       set -g mouse on
 
-      # -----------------------------------------------------------------------------
-      # Key bindings
-      # -----------------------------------------------------------------------------
+      # Disable auto window renaming
+      set-option -g allow-rename off
 
-      # Unbind default keys
-      unbind C-b
+      # Display time for messages
+      set -g display-time 4000
+
+      # Dracula theme config
+      set -g @dracula-plugins "git kubernetes-context cpu-usage ram-usage network-vpn battery time"
+      set -g @dracula-kubernetes-context-label "k8s: "
+      set -g @dracula-kubernetes-eks-hide-arn true
+      set -g @dracula-kubernetes-hide-user true
+
+      # -----------------------------------------------------------------------------
+      # Splits — keep current path
+      # -----------------------------------------------------------------------------
       unbind '"'
       unbind %
+      bind '"' split-window -v -c "#{pane_current_path}"
+      bind % split-window -h -c "#{pane_current_path}"
 
-      # Split panes, vertical or horizontal
-      bind-key x split-window -v
-      bind-key v split-window -h
+      # Vim-style pane navigation (with prefix)
+      bind h select-pane -L
+      bind j select-pane -D
+      bind k select-pane -U
+      bind l select-pane -R
 
-      # Move around panes with vim-like bindings (h,j,k,l)
-      bind-key -n M-k select-pane -U
-      bind-key -n M-h select-pane -L
-      bind-key -n M-j select-pane -D
-      bind-key -n M-l select-pane -R
+      # Alt-arrow to switch panes without prefix
+      bind -n M-Left select-pane -L
+      bind -n M-Right select-pane -R
+      bind -n M-Up select-pane -U
+      bind -n M-Down select-pane -D
 
-      # Smart pane switching with awareness of Vim splits.
-      # This is copy paste from https://github.com/christoomey/vim-tmux-navigator
+      # Smart pane switching with vim awareness (vim-tmux-navigator)
       is_vim="ps -o state= -o comm= -t '#{pane_tty}' \
         | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|n?vim?x?)(diff)?$'"
-      bind-key -n 'C-h' if-shell "$is_vim" 'send-keys C-h'  'select-pane -L'
-      bind-key -n 'C-j' if-shell "$is_vim" 'send-keys C-j'  'select-pane -D'
-      bind-key -n 'C-k' if-shell "$is_vim" 'send-keys C-k'  'select-pane -U'
-      bind-key -n 'C-l' if-shell "$is_vim" 'send-keys C-l'  'select-pane -R'
-      tmux_version='$(tmux -V | sed -En "s/^tmux ([0-9]+(.[0-9]+)?).*/\1/p")'
-      if-shell -b '[ "$(echo "$tmux_version < 3.0" | bc)" = 1 ]' \
-        "bind-key -n 'C-\\' if-shell \"$is_vim\" 'send-keys C-\\'  'select-pane -l'"
-      if-shell -b '[ "$(echo "$tmux_version >= 3.0" | bc)" = 1 ]' \
-        "bind-key -n 'C-\\' if-shell \"$is_vim\" 'send-keys C-\\\\'  'select-pane -l'"
+      bind-key -n 'C-h' if-shell "$is_vim" 'send-keys C-h' 'select-pane -L'
+      bind-key -n 'C-j' if-shell "$is_vim" 'send-keys C-j' 'select-pane -D'
+      bind-key -n 'C-k' if-shell "$is_vim" 'send-keys C-k' 'select-pane -U'
+      bind-key -n 'C-l' if-shell "$is_vim" 'send-keys C-l' 'select-pane -R'
 
       bind-key -T copy-mode-vi 'C-h' select-pane -L
       bind-key -T copy-mode-vi 'C-j' select-pane -D
       bind-key -T copy-mode-vi 'C-k' select-pane -U
       bind-key -T copy-mode-vi 'C-l' select-pane -R
-      bind-key -T copy-mode-vi 'C-\' select-pane -l
-      '';
-    };
+
+      # -----------------------------------------------------------------------------
+      # Vi copy mode
+      # -----------------------------------------------------------------------------
+      set-window-option -g mode-keys vi
+      bind-key v copy-mode
+      bind-key -T copy-mode-vi v send-keys -X begin-selection
+      bind-key -T copy-mode-vi C-v send-keys -X rectangle-toggle
+      bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+      bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-selection -x
+
+      # -----------------------------------------------------------------------------
+      # Floating windows
+      # -----------------------------------------------------------------------------
+      # Lazygit popup (prefix + g)
+      bind-key g display-popup -E -d "#{pane_current_path}" -xC -yC -w 80% -h 75% "lazygit"
+
+      unbind Space
+    '';
+  };
 }

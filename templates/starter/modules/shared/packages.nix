@@ -57,6 +57,8 @@ with pkgs; [
 
   # Shell
   zsh-powerlevel10k
+  zsh-syntax-highlighting
+  zsh-autosuggestions
 
   # Cloud / DevOps
   terraform
