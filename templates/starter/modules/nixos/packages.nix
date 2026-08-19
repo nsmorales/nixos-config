@@ -47,6 +47,7 @@ shared-packages ++ [
   # System utilities
   inotify-tools  # inotifywait, inotifywatch
   sqlite
+  ncurses        # Provides tmux-256color terminfo for true color
 
   # Browsers
   firefox

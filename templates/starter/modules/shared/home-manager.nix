@@ -323,13 +323,15 @@ let name = "%NAME%";
         '';
       }
     ];
-    terminal = "xterm-256color";
+    terminal = "tmux-256color";
     prefix = "C-Space";
     escapeTime = 10;
     historyLimit = 50000;
     extraConfig = ''
-      # True color support
+      # True color support — pass 24-bit RGB through to the outer terminal
       set-option -sa terminal-overrides ",xterm*:Tc"
+      set-option -sa terminal-overrides ",ghostty:Tc"
+      set-option -sa terminal-overrides ",tmux-256color:Tc"
 
       # Focus events for terminals that support them
       set -g focus-events on
