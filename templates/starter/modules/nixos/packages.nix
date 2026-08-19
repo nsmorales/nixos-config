@@ -49,8 +49,7 @@ shared-packages ++ [
   sqlite
   ncurses        # Provides tmux-256color terminfo for true color
 
-  # AMD GPU
-  amdvlk         # AMD Vulkan driver (better Wayland/Hyprland performance)
+  # AMD GPU — RADV (Mesa Vulkan driver) is enabled by default via hardware.graphics
 
   # Browsers
   firefox
