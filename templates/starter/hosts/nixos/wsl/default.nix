@@ -14,7 +14,7 @@ in {
     startMenuLaunchers = true;
     # Enable WSLg for GUI app support (requires Windows 11 or Win10 with WSLg)
     # GUI apps like firefox can run via WSLg
-    nativeSystemd = true;
+    # nativeSystemd is always enabled in newer nixos-wsl
   };
 
   # Nix settings

@@ -52,6 +52,7 @@ with pkgs; [
   gh
   lazygit
   direnv
+  mise
   opencode
 
   # Shell
