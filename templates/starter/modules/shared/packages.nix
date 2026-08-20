@@ -52,6 +52,7 @@ with pkgs; [
   gh
   lazygit
   direnv
+  opencode
 
   # Shell
   zsh-powerlevel10k

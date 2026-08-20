@@ -118,9 +118,9 @@
           inherit system;
           specialArgs = inputs // { inherit nur; };
           modules = [
-            disko.nixosModules.disko
-            { nixpkgs.overlays = [ nur.overlays.default ]; }
-            home-manager.nixosModules.home-manager {
+          disko.nixosModules.disko
+          { nixpkgs.overlays = [ nur.overlays.default ]; }
+          home-manager.nixosModules.home-manager {
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
@@ -139,8 +139,8 @@
             system = "x86_64-linux";
             specialArgs = inputs // { inherit nur; };
             modules = [
-              nixos-wsl.nixosModules.wsl
-              { nixpkgs.overlays = [ nur.overlays.default ]; }
+          nixos-wsl.nixosModules.wsl
+          { nixpkgs.overlays = [ nur.overlays.default ]; }
               home-manager.nixosModules.home-manager {
                 home-manager = {
                   useGlobalPkgs = true;

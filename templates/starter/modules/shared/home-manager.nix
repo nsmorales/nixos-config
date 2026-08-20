@@ -235,7 +235,7 @@ let name = "%NAME%";
     settings = {
       font-family = "JetBrainsMono Nerd Font";
       font-size = lib.mkMerge [
-        (lib.mkIf pkgs.stdenv.hostPlatform.isLinux 16)
+        (lib.mkIf pkgs.stdenv.hostPlatform.isLinux 12)
         (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin 18)
       ];
       font-feature = [ "calt" "liga" "dlig" ]; # ligatures
@@ -294,7 +294,7 @@ let name = "%NAME%";
           style = "Italic";
         };
         size = lib.mkMerge [
-          (lib.mkIf pkgs.stdenv.hostPlatform.isLinux 16)
+          (lib.mkIf pkgs.stdenv.hostPlatform.isLinux 12)
           (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin 18)
         ];
       };
@@ -337,6 +337,15 @@ let name = "%NAME%";
           cyan =    "#5fb3b3";
           white =   "#d8dee9";
         };
+      };
+
+      # Auto-attach to tmux on launch (same logic as Ghostty)
+      terminal.shell = {
+        program = "${pkgs.zsh}/bin/zsh";
+        args = [
+          "-c"
+          "if [ -n \"$TMUX\" ]; then exec zsh; fi; tmux ls 2>/dev/null; read tmux_session; exec tmux new-session -A -s \${tmux_session:-default}"
+        ];
       };
     };
   };

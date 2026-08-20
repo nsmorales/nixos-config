@@ -433,7 +433,8 @@ in
     '';
   };
 
-firefox = {
+  # Firefox with declarative extensions via NUR
+  firefox = {
     enable = true;
     profiles.nmorales = {
       isDefault = true;
@@ -442,6 +443,9 @@ firefox = {
         surfingkeys
         ublacklist
         simple-tab-groups
+        darkreader
+        leechblock-ng
+        youtube-recommended-videos  # Unhook: Remove YouTube recommended
       ];
       settings = {
         # Performance
@@ -461,6 +465,7 @@ firefox = {
       };
     };
   };
+
   }; # end programs
 
   # Dunst notification daemon (Wayland compatible)
