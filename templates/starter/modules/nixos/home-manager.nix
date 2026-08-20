@@ -206,13 +206,13 @@ in
         ", XF86AudioPrev, exec, playerctl previous"
       ];
 
-      # Window rules — windowrule matches class by default (no class: prefix)
+      # Window rules — new format: "effect arg, match:class ^(regex)$"
       windowrule = [
-        "float, ^(pavucontrol)$"
-        "float, ^(blueman-manager)$"
-        "float, ^(nm-connection-editor)$"
-        "center, ^(pavucontrol)$"
-        "size 800 600, ^(pavucontrol)$"
+        "float on, match:class ^(pavucontrol)$"
+        "float on, match:class ^(blueman-manager)$"
+        "float on, match:class ^(nm-connection-editor)$"
+        "center on, match:class ^(pavucontrol)$"
+        "size 800 600, match:class ^(pavucontrol)$"
       ];
     };
   };
