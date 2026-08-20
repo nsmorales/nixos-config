@@ -433,6 +433,34 @@ in
     '';
   };
 
+firefox = {
+    enable = true;
+    profiles.nmorales = {
+      isDefault = true;
+      extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
+        ublock-origin
+        surfingkeys
+        ublacklist
+        simple-tab-groups
+      ];
+      settings = {
+        # Performance
+        "gfx.webrender.all" = true;
+        "media.ffmpeg.vaapi.enabled" = true; # Hardware video decode
+        # Privacy
+        "privacy.trackingprotection.enabled" = true;
+        "privacy.trackingprotection.socialtracking.enabled" = true;
+        # Disable telemetry
+        "datareporting.healthreport.uploadEnabled" = false;
+        "datareporting.policy.dataSubmissionEnabled" = false;
+        "toolkit.telemetry.enabled" = false;
+        "toolkit.telemetry.unified" = false;
+        # UI
+        "browser.tabs.closeWindowWithLastTab" = false;
+        "browser.toolbars.bookmarks.visibility" = "never";
+      };
+    };
+  };
   }; # end programs
 
   # Dunst notification daemon (Wayland compatible)
@@ -498,36 +526,6 @@ in
   services.udiskie = {
     enable = true;
     tray = "auto";
-  };
-
-  # Firefox with declarative extensions via NUR
-  programs.firefox = {
-    enable = true;
-    profiles.nmorales = {
-      isDefault = true;
-      extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
-        ublock-origin
-        surfingkeys
-        ublacklist
-        simple-tab-groups
-      ];
-      settings = {
-        # Performance
-        "gfx.webrender.all" = true;
-        "media.ffmpeg.vaapi.enabled" = true; # Hardware video decode
-        # Privacy
-        "privacy.trackingprotection.enabled" = true;
-        "privacy.trackingprotection.socialtracking.enabled" = true;
-        # Disable telemetry
-        "datareporting.healthreport.uploadEnabled" = false;
-        "datareporting.policy.dataSubmissionEnabled" = false;
-        "toolkit.telemetry.enabled" = false;
-        "toolkit.telemetry.unified" = false;
-        # UI
-        "browser.tabs.closeWindowWithLastTab" = false;
-        "browser.toolbars.bookmarks.visibility" = "never";
-      };
-    };
   };
 
 }
