@@ -17,18 +17,18 @@ shared-packages ++ [
   fontconfig
 
   # Audio tools
-  pavucontrol    # Volume/audio control GUI
-  playerctl      # Media player control (play/pause/next/prev)
-  brightnessctl  # Screen brightness control
+  pavucontrol # Volume/audio control GUI
+  playerctl # Media player control (play/pause/next/prev)
+  brightnessctl # Screen brightness control
 
   # Wayland / display tools
-  grim           # Screenshot tool (Wayland)
-  slurp          # Region selection for screenshots
-  hyprpaper      # Wallpaper daemon for Hyprland
-  hyprlock       # Screen locker for Hyprland
-  wdisplays      # Display configuration GUI (Wayland)
-  wev            # Wayland event viewer (debug input)
-  kanshi         # Automatic display configuration
+  grim # Screenshot tool (Wayland)
+  slurp # Region selection for screenshots
+  hyprpaper # Wallpaper daemon for Hyprland
+  hyprlock # Screen locker for Hyprland
+  wdisplays # Display configuration GUI (Wayland)
+  wev # Wayland event viewer (debug input)
+  kanshi # Automatic display configuration
 
   # Application launcher & bar
   wofi
@@ -41,11 +41,11 @@ shared-packages ++ [
   networkmanagerapplet
 
   # File management
-  pcmanfm        # GUI file manager
-  xdg-utils      # xdg-open and friends
+  pcmanfm # GUI file manager
+  xdg-utils # xdg-open and friends
 
   # System utilities
-  inotify-tools  # inotifywait, inotifywatch
+  inotify-tools # inotifywait, inotifywatch
   sqlite
   # AMD GPU — RADV (Mesa Vulkan driver) is enabled by default via hardware.graphics
 

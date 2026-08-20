@@ -1,9 +1,9 @@
 { user, pkgs, ... }:
 
 let
-  home           = "/home/${user}";
+  home = "/home/${user}";
   xdg_configHome = "${home}/.config";
-  xdg_dataHome   = "${home}/.local/share";
+  xdg_dataHome = "${home}/.local/share";
 in
 {
   # Hyprpaper wallpaper configuration

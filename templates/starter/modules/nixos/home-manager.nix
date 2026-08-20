@@ -2,17 +2,17 @@
 
 let
   user = "nmorales";
-  xdg_configHome = "/home/${user}/.config";
-  shared-programs = import ../shared/home-manager.nix { inherit config pkgs lib; };
   shared-files = import ../shared/files.nix { inherit config pkgs; };
 
 in
 {
+  imports = [ ../shared/home-manager.nix ];
+
   home = {
     enableNixpkgsReleaseCheck = false;
     username = "${user}";
     homeDirectory = "/home/${user}";
-    packages = pkgs.callPackage ./packages.nix {};
+    packages = pkgs.callPackage ./packages.nix { };
     file = shared-files // import ./files.nix { inherit user pkgs; };
     stateVersion = "26.05";
   };
@@ -217,254 +217,254 @@ in
     };
   };
 
-  programs = shared-programs // {
+  programs = {
 
-  # Waybar
-  waybar = {
-    enable = true;
-    settings = [{
-      layer = "top";
-      position = "top";
-      height = 32;
-      spacing = 4;
+    # Waybar
+    waybar = {
+      enable = true;
+      settings = [{
+        layer = "top";
+        position = "top";
+        height = 32;
+        spacing = 4;
 
-      modules-left = [ "hyprland/workspaces" "hyprland/submap" ];
-      modules-center = [ "hyprland/window" ];
-      modules-right = [
-        "pulseaudio"
-        "network"
-        "cpu"
-        "memory"
-        "battery"
-        "clock"
-        "tray"
-      ];
+        modules-left = [ "hyprland/workspaces" "hyprland/submap" ];
+        modules-center = [ "hyprland/window" ];
+        modules-right = [
+          "pulseaudio"
+          "network"
+          "cpu"
+          "memory"
+          "battery"
+          "clock"
+          "tray"
+        ];
 
-      "hyprland/workspaces" = {
-        disable-scroll = true;
-        all-outputs = true;
-        format = "{icon}";
-        format-icons = {
-          "1" = "";
-          "2" = "";
-          "3" = "";
-          "4" = "";
-          "5" = "";
-          urgent = "";
-          active = "";
-          default = "";
+        "hyprland/workspaces" = {
+          disable-scroll = true;
+          all-outputs = true;
+          format = "{icon}";
+          format-icons = {
+            "1" = "";
+            "2" = "";
+            "3" = "";
+            "4" = "";
+            "5" = "";
+            urgent = "";
+            active = "";
+            default = "";
+          };
         };
-      };
 
-      "hyprland/window" = {
-        max-length = 60;
-      };
-
-      cpu = {
-        format = " {usage}%";
-        tooltip = false;
-      };
-
-      memory = {
-        format = " {}%";
-      };
-
-      battery = {
-        states = {
-          warning = 30;
-          critical = 15;
+        "hyprland/window" = {
+          max-length = 60;
         };
-        format = "{icon} {capacity}%";
-        format-charging = " {capacity}%";
-        format-plugged = " {capacity}%";
-        format-icons = [ "" "" "" "" "" ];
-      };
 
-      network = {
-        format-wifi = " {essid} ({signalStrength}%)";
-        format-ethernet = " {ifname}";
-        format-disconnected = "⚠ Disconnected";
-        tooltip-format = "{ifname}: {ipaddr}/{cidr}";
-      };
-
-      pulseaudio = {
-        format = "{icon} {volume}%";
-        format-muted = " Muted";
-        format-icons = {
-          default = [ "" "" "" ];
+        cpu = {
+          format = " {usage}%";
+          tooltip = false;
         };
-        on-click = "pavucontrol";
-      };
 
-      clock = {
-        format = " {:%H:%M}";
-        format-alt = " {:%A, %B %d, %Y}";
-        tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
-      };
+        memory = {
+          format = " {}%";
+        };
 
-      tray = {
-        spacing = 8;
-      };
-    }];
+        battery = {
+          states = {
+            warning = 30;
+            critical = 15;
+          };
+          format = "{icon} {capacity}%";
+          format-charging = " {capacity}%";
+          format-plugged = " {capacity}%";
+          format-icons = [ "" "" "" "" "" ];
+        };
 
-    style = ''
-      * {
-        font-family: "JetBrainsMono Nerd Font", "Font Awesome 6 Free";
-        font-size: 13px;
-        min-height: 0;
-      }
+        network = {
+          format-wifi = " {essid} ({signalStrength}%)";
+          format-ethernet = " {ifname}";
+          format-disconnected = "⚠ Disconnected";
+          tooltip-format = "{ifname}: {ipaddr}/{cidr}";
+        };
 
-      window#waybar {
-        background-color: rgba(31, 37, 40, 0.92);
-        color: #c0c5ce;
-        border-bottom: 2px solid rgba(102, 153, 204, 0.5);
-      }
+        pulseaudio = {
+          format = "{icon} {volume}%";
+          format-muted = " Muted";
+          format-icons = {
+            default = [ "" "" "" ];
+          };
+          on-click = "pavucontrol";
+        };
 
-      #workspaces button {
-        padding: 0 8px;
-        color: #65737e;
-        background: transparent;
-        border: none;
-      }
+        clock = {
+          format = " {:%H:%M}";
+          format-alt = " {:%A, %B %d, %Y}";
+          tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
+        };
 
-      #workspaces button.active {
-        color: #6699cc;
-        background: rgba(102, 153, 204, 0.15);
-        border-bottom: 2px solid #6699cc;
-      }
+        tray = {
+          spacing = 8;
+        };
+      }];
 
-      #workspaces button.urgent {
-        color: #ec5f67;
-      }
+      style = ''
+        * {
+          font-family: "JetBrainsMono Nerd Font", "Font Awesome 6 Free";
+          font-size: 13px;
+          min-height: 0;
+        }
 
-      #clock,
-      #battery,
-      #cpu,
-      #memory,
-      #network,
-      #pulseaudio,
-      #tray,
-      #submap {
-        padding: 0 12px;
-        color: #c0c5ce;
-      }
+        window#waybar {
+          background-color: rgba(31, 37, 40, 0.92);
+          color: #c0c5ce;
+          border-bottom: 2px solid rgba(102, 153, 204, 0.5);
+        }
 
-      #battery.warning {
-        color: #fac863;
-      }
+        #workspaces button {
+          padding: 0 8px;
+          color: #65737e;
+          background: transparent;
+          border: none;
+        }
 
-      #battery.critical {
-        color: #ec5f67;
-        animation: blink 0.5s steps(1) infinite;
-      }
+        #workspaces button.active {
+          color: #6699cc;
+          background: rgba(102, 153, 204, 0.15);
+          border-bottom: 2px solid #6699cc;
+        }
 
-      @keyframes blink {
-        to { color: #1f2528; background-color: #ec5f67; }
-      }
+        #workspaces button.urgent {
+          color: #ec5f67;
+        }
 
-      #window {
-        color: #99c794;
-      }
-    '';
-  };
+        #clock,
+        #battery,
+        #cpu,
+        #memory,
+        #network,
+        #pulseaudio,
+        #tray,
+        #submap {
+          padding: 0 12px;
+          color: #c0c5ce;
+        }
 
-  # wofi launcher
-  wofi = {
-    enable = true;
-    settings = {
-      width = 600;
-      height = 400;
-      location = "center";
-      show = "drun";
-      prompt = "Search...";
-      filter_rate = 100;
-      allow_markup = true;
-      no_actions = true;
-      halign = "fill";
-      orientation = "vertical";
-      content_halign = "fill";
-      insensitive = true;
-      allow_images = true;
-      image_size = 24;
+        #battery.warning {
+          color: #fac863;
+        }
+
+        #battery.critical {
+          color: #ec5f67;
+          animation: blink 0.5s steps(1) infinite;
+        }
+
+        @keyframes blink {
+          to { color: #1f2528; background-color: #ec5f67; }
+        }
+
+        #window {
+          color: #99c794;
+        }
+      '';
     };
-    style = ''
-      window {
-        margin: 0px;
-        background-color: #1f2528;
-        border: 2px solid #6699cc;
-        border-radius: 8px;
-        font-family: "JetBrainsMono Nerd Font";
-        font-size: 14px;
-      }
 
-      #input {
-        padding: 8px 16px;
-        color: #c0c5ce;
-        background-color: #1f2528;
-        border: none;
-        border-bottom: 1px solid #65737e;
-        border-radius: 0;
-      }
-
-      #inner-box {
-        background-color: #1f2528;
-      }
-
-      #outer-box {
-        margin: 0;
-        padding: 4px;
-        background-color: #1f2528;
-      }
-
-      #entry {
-        padding: 4px 8px;
-        border-radius: 4px;
-        color: #c0c5ce;
-      }
-
-      #entry:selected {
-        background-color: rgba(102, 153, 204, 0.2);
-        color: #6699cc;
-      }
-
-      #text {
-        padding: 0 4px;
-      }
-    '';
-  };
-
-  # Firefox with declarative extensions via NUR
-  firefox = {
-    enable = true;
-    profiles.nmorales = {
-      isDefault = true;
-      extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
-        ublock-origin
-        surfingkeys
-        ublacklist
-        simple-tab-groups
-        darkreader
-        leechblock-ng
-        youtube-recommended-videos  # Unhook: Remove YouTube recommended
-      ];
+    # wofi launcher
+    wofi = {
+      enable = true;
       settings = {
-        # Performance
-        "gfx.webrender.all" = true;
-        "media.ffmpeg.vaapi.enabled" = true; # Hardware video decode
-        # Privacy
-        "privacy.trackingprotection.enabled" = true;
-        "privacy.trackingprotection.socialtracking.enabled" = true;
-        # Disable telemetry
-        "datareporting.healthreport.uploadEnabled" = false;
-        "datareporting.policy.dataSubmissionEnabled" = false;
-        "toolkit.telemetry.enabled" = false;
-        "toolkit.telemetry.unified" = false;
-        # UI
-        "browser.tabs.closeWindowWithLastTab" = false;
-        "browser.toolbars.bookmarks.visibility" = "never";
+        width = 600;
+        height = 400;
+        location = "center";
+        show = "drun";
+        prompt = "Search...";
+        filter_rate = 100;
+        allow_markup = true;
+        no_actions = true;
+        halign = "fill";
+        orientation = "vertical";
+        content_halign = "fill";
+        insensitive = true;
+        allow_images = true;
+        image_size = 24;
+      };
+      style = ''
+        window {
+          margin: 0px;
+          background-color: #1f2528;
+          border: 2px solid #6699cc;
+          border-radius: 8px;
+          font-family: "JetBrainsMono Nerd Font";
+          font-size: 14px;
+        }
+
+        #input {
+          padding: 8px 16px;
+          color: #c0c5ce;
+          background-color: #1f2528;
+          border: none;
+          border-bottom: 1px solid #65737e;
+          border-radius: 0;
+        }
+
+        #inner-box {
+          background-color: #1f2528;
+        }
+
+        #outer-box {
+          margin: 0;
+          padding: 4px;
+          background-color: #1f2528;
+        }
+
+        #entry {
+          padding: 4px 8px;
+          border-radius: 4px;
+          color: #c0c5ce;
+        }
+
+        #entry:selected {
+          background-color: rgba(102, 153, 204, 0.2);
+          color: #6699cc;
+        }
+
+        #text {
+          padding: 0 4px;
+        }
+      '';
+    };
+
+    # Firefox with declarative extensions via NUR
+    firefox = {
+      enable = true;
+      profiles.nmorales = {
+        isDefault = true;
+        extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
+          ublock-origin
+          surfingkeys
+          ublacklist
+          simple-tab-groups
+          darkreader
+          leechblock-ng
+          youtube-recommended-videos # Unhook: Remove YouTube recommended
+        ];
+        settings = {
+          # Performance
+          "gfx.webrender.all" = true;
+          "media.ffmpeg.vaapi.enabled" = true; # Hardware video decode
+          # Privacy
+          "privacy.trackingprotection.enabled" = true;
+          "privacy.trackingprotection.socialtracking.enabled" = true;
+          # Disable telemetry
+          "datareporting.healthreport.uploadEnabled" = false;
+          "datareporting.policy.dataSubmissionEnabled" = false;
+          "toolkit.telemetry.enabled" = false;
+          "toolkit.telemetry.unified" = false;
+          # UI
+          "browser.tabs.closeWindowWithLastTab" = false;
+          "browser.toolbars.bookmarks.visibility" = "never";
+        };
       };
     };
-  };
 
   }; # end programs
 

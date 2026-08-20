@@ -3,7 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    home-manager.url = "github:nix-community/home-manager";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     darwin = {
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -43,14 +46,15 @@
       linuxSystems = [ "x86_64-linux" "aarch64-linux" ];
       darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
       forAllSystems = f: nixpkgs.lib.genAttrs (linuxSystems ++ darwinSystems) f;
-      devShell = system: let pkgs = nixpkgs.legacyPackages.${system}; in {
-        default = with pkgs; mkShell {
-          nativeBuildInputs = with pkgs; [ bashInteractive git ];
-          shellHook = with pkgs; ''
-            export EDITOR=vim
-          '';
+      devShell = system:
+        let pkgs = nixpkgs.legacyPackages.${system}; in {
+          default = pkgs.mkShell {
+            nativeBuildInputs = with pkgs; [ bashInteractive git ];
+            shellHook = ''
+              export EDITOR=vim
+            '';
+          };
         };
-      };
       mkApp = scriptName: system: {
         type = "app";
         program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin scriptName ''
@@ -60,14 +64,11 @@
           exec ${self}/apps/${system}/${scriptName}
         '')}/bin/${scriptName}";
       };
+      # Only declare apps whose scripts exist under apps/<system>/
       mkLinuxApps = system: {
         "apply" = mkApp "apply" system;
         "build-switch" = mkApp "build-switch" system;
         "clean" = mkApp "clean" system;
-        "copy-keys" = mkApp "copy-keys" system;
-        "create-keys" = mkApp "create-keys" system;
-        "check-keys" = mkApp "check-keys" system;
-        "install" = mkApp "install" system;
       };
       mkDarwinApps = system: {
         "apply" = mkApp "apply" system;
@@ -84,12 +85,10 @@
       devShells = forAllSystems devShell;
       apps = nixpkgs.lib.genAttrs linuxSystems mkLinuxApps // nixpkgs.lib.genAttrs darwinSystems mkDarwinApps;
 
-      darwinConfigurations = nixpkgs.lib.genAttrs darwinSystems (system: let
-        user = "nmorales";
-      in
+      darwinConfigurations = nixpkgs.lib.genAttrs darwinSystems (system:
         darwin.lib.darwinSystem {
           inherit system;
-          specialArgs = inputs;
+          specialArgs = { inherit inputs; };
           modules = [
             home-manager.darwinModules.home-manager
             nix-homebrew.darwinModules.nix-homebrew
@@ -114,34 +113,36 @@
       nixosConfigurations =
 
         # Platform-based generic configuration (fresh installs)
-        nixpkgs.lib.genAttrs linuxSystems (system: nixpkgs.lib.nixosSystem {
-          inherit system;
-          specialArgs = inputs // { inherit nur; };
-          modules = [
-          disko.nixosModules.disko
-          { nixpkgs.overlays = [ nur.overlays.default ]; }
-          home-manager.nixosModules.home-manager {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                users.${user} = import ./modules/nixos/home-manager.nix;
-              };
-            }
-            ./hosts/nixos
-          ];
-        })
+        nixpkgs.lib.genAttrs linuxSystems
+          (system: nixpkgs.lib.nixosSystem {
+            inherit system;
+            specialArgs = { inherit inputs; };
+            modules = [
+              disko.nixosModules.disko
+              { nixpkgs.overlays = [ nur.overlays.default ]; }
+              home-manager.nixosModules.home-manager
+              {
+                home-manager = {
+                  useGlobalPkgs = true;
+                  useUserPackages = true;
+                  users.${user} = import ./modules/nixos/home-manager.nix;
+                };
+              }
+              ./hosts/nixos
+            ];
+          })
 
-        // # Named host configurations
-
-        {
+        # Named host configurations
+        // {
           # WSL (Windows Subsystem for Linux)
           wsl = nixpkgs.lib.nixosSystem {
             system = "x86_64-linux";
-            specialArgs = inputs // { inherit nur; };
+            specialArgs = { inherit inputs; };
             modules = [
-          nixos-wsl.nixosModules.wsl
-          { nixpkgs.overlays = [ nur.overlays.default ]; }
-              home-manager.nixosModules.home-manager {
+              nixos-wsl.nixosModules.wsl
+              { nixpkgs.overlays = [ nur.overlays.default ]; }
+              home-manager.nixosModules.home-manager
+              {
                 home-manager = {
                   useGlobalPkgs = true;
                   useUserPackages = true;
@@ -152,5 +153,5 @@
             ];
           };
         };
-  };
+    };
 }

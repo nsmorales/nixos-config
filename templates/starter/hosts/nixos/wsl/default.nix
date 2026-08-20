@@ -2,7 +2,8 @@
 
 let
   user = "nmorales";
-in {
+in
+{
   imports = [
     ../../../modules/shared
   ];
@@ -17,17 +18,7 @@ in {
     # nativeSystemd is always enabled in newer nixos-wsl
   };
 
-  # Nix settings
-  nix = {
-    settings = {
-      allowed-users = [ "${user}" ];
-      trusted-users = [ "@admin" "${user}" ];
-      substituters = [ "https://nix-community.cachix.org" "https://cache.nixos.org" ];
-      trusted-public-keys = [ "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" ];
-      experimental-features = [ "nix-command" "flakes" ];
-    };
-    package = pkgs.nix;
-  };
+  # Nix settings (caches, keys, features, users) are defined in modules/shared
 
   # No bootloader — Windows handles booting
   # No display manager — WSL starts a shell directly
@@ -57,13 +48,7 @@ in {
   };
 
   # Fonts (for WSLg GUI apps)
-  fonts.packages = with pkgs; [
-    jetbrains-mono
-    nerd-fonts.jetbrains-mono
-    nerd-fonts.noto
-    noto-fonts
-    noto-fonts-color-emoji
-  ];
+  fonts.packages = import ../../../modules/shared/fonts.nix { inherit pkgs; };
 
   environment.systemPackages = with pkgs; [
     gitFull

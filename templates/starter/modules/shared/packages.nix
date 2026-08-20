@@ -21,20 +21,11 @@ with pkgs; [
   docker
   docker-compose
 
-  # Fonts
-  dejavu_fonts
-  font-awesome
-  hack-font
-  noto-fonts
-  noto-fonts-color-emoji
-  meslo-lgs-nf
-  jetbrains-mono
-  nerd-fonts.jetbrains-mono
-  nerd-fonts.noto
+  # Fonts are defined in modules/shared/fonts.nix (single source)
 
   # Text and terminal utilities
   ghostty
-  alacritty  # Backup terminal emulator
+  alacritty # Backup terminal emulator
   htop
   jq
   neovim

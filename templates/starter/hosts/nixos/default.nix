@@ -5,7 +5,8 @@ let
   sshKeys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOk8iAnIaa1deoc7jw8YACPNVka1ZFJxhnU4G74TmS+p"
   ];
-in {
+in
+{
   imports = [
     ./hardware-configuration.nix
     ../../modules/shared
@@ -14,6 +15,7 @@ in {
   ];
 
   # Use the systemd-boot EFI boot loader.
+  # Hardware modules (initrd, filesystems) are owned by hardware-configuration.nix
   boot = {
     loader = {
       systemd-boot = {
@@ -22,8 +24,6 @@ in {
       };
       efi.canTouchEfiVariables = true;
     };
-    initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
-    initrd.kernelModules = [ "amdgpu" ];
     kernelPackages = pkgs.linuxPackages_latest;
     kernelModules = [ "uinput" ];
   };
@@ -36,20 +36,9 @@ in {
     networkmanager.enable = true;
   };
 
-  # Turn on flag for proprietary software
+  # Nix settings (caches, keys, features, users) are defined in modules/shared
   nix = {
     nixPath = [ "nixos-config=/home/${user}/.local/share/src/nixos-config:/etc/nixos" ];
-    settings = {
-      allowed-users = [ "${user}" ];
-      trusted-users = [ "@admin" "${user}" ];
-      substituters = [ "https://nix-community.cachix.org" "https://cache.nixos.org" ];
-      trusted-public-keys = [ "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" ];
-    };
-
-    package = pkgs.nix;
-    extraOptions = ''
-      experimental-features = nix-command flakes
-    '';
   };
 
   programs = {
@@ -118,7 +107,7 @@ in {
       overrideDevices = true;
 
       settings = {
-        devices = {};
+        devices = { };
         options.globalAnnounceEnabled = false; # Only sync on LAN
       };
     };
@@ -135,8 +124,8 @@ in {
       enable32Bit = true; # For 32-bit apps (Steam, Wine, etc.)
     };
     amdgpu = {
-      initrd.enable = true;  # Early KMS for faster boot / better Wayland startup
-      opencl.enable = true;  # OpenCL compute support
+      initrd.enable = true; # Early KMS for faster boot / better Wayland startup
+      opencl.enable = true; # OpenCL compute support
     };
     bluetooth = {
       enable = true;
@@ -148,7 +137,7 @@ in {
 
   # Security: PAM for Hyprlock screen locker
   security = {
-    pam.services.hyprlock = {};
+    pam.services.hyprlock = { };
     rtkit.enable = true; # Required for PipeWire real-time priority
   };
 
@@ -165,7 +154,7 @@ in {
     ${user} = {
       isNormalUser = true;
       extraGroups = [
-        "wheel"    # Enable 'sudo' for the user
+        "wheel" # Enable 'sudo' for the user
         "docker"
         "networkmanager"
         "video"
@@ -186,24 +175,16 @@ in {
     enable = true;
     extraRules = [{
       commands = [
-       {
-         command = "${pkgs.systemd}/bin/reboot";
-         options = [ "NOPASSWD" ];
+        {
+          command = "${pkgs.systemd}/bin/reboot";
+          options = [ "NOPASSWD" ];
         }
       ];
       groups = [ "wheel" ];
     }];
   };
 
-  fonts.packages = with pkgs; [
-    dejavu_fonts
-    jetbrains-mono
-    font-awesome
-    noto-fonts
-    noto-fonts-color-emoji
-    nerd-fonts.jetbrains-mono
-    nerd-fonts.noto
-  ];
+  fonts.packages = import ../../modules/shared/fonts.nix { inherit pkgs; };
 
   environment.systemPackages = with pkgs; [
     gitFull
