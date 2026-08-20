@@ -27,9 +27,17 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nur = {
+      url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, home-manager, nixpkgs, disko } @inputs:
+  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, home-manager, nixpkgs, disko, nur, nixos-wsl } @inputs:
     let
       user = "nmorales";
       linuxSystems = [ "x86_64-linux" "aarch64-linux" ];
@@ -103,20 +111,46 @@
         }
       );
 
-      nixosConfigurations = nixpkgs.lib.genAttrs linuxSystems (system: nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = inputs;
-        modules = [
-          disko.nixosModules.disko
-          home-manager.nixosModules.home-manager {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              users.${user} = import ./modules/nixos/home-manager.nix;
-            };
-          }
-          ./hosts/nixos
-        ];
-     });
+      nixosConfigurations =
+
+        # Platform-based generic configuration (fresh installs)
+        nixpkgs.lib.genAttrs linuxSystems (system: nixpkgs.lib.nixosSystem {
+          inherit system;
+          specialArgs = inputs // { inherit nur; };
+          modules = [
+            disko.nixosModules.disko
+            { nixpkgs.overlays = [ nur.overlays.default ]; }
+            home-manager.nixosModules.home-manager {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                users.${user} = import ./modules/nixos/home-manager.nix;
+              };
+            }
+            ./hosts/nixos
+          ];
+        })
+
+        // # Named host configurations
+
+        {
+          # WSL (Windows Subsystem for Linux)
+          wsl = nixpkgs.lib.nixosSystem {
+            system = "x86_64-linux";
+            specialArgs = inputs // { inherit nur; };
+            modules = [
+              nixos-wsl.nixosModules.wsl
+              { nixpkgs.overlays = [ nur.overlays.default ]; }
+              home-manager.nixosModules.home-manager {
+                home-manager = {
+                  useGlobalPkgs = true;
+                  useUserPackages = true;
+                  users.${user} = import ./modules/nixos/wsl-home-manager.nix;
+                };
+              }
+              ./hosts/nixos/wsl
+            ];
+          };
+        };
   };
 }

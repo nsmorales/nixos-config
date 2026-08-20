@@ -61,8 +61,8 @@ in
         "XDG_CURRENT_DESKTOP,Hyprland"
         "XDG_SESSION_TYPE,wayland"
         "XDG_SESSION_DESKTOP,Hyprland"
-        # Ensure Nix profile binaries are in PATH for exec binds
-        "PATH,$HOME/.nix-profile/bin:/etc/profiles/per-user/nmorales/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:$PATH"
+        # Ensure Nix profile binaries and setuid wrappers (sudo) are in PATH
+        "PATH,\$HOME/.nix-profile/bin:/etc/profiles/per-user/nmorales/bin:/run/wrappers/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:\$PATH"
       ];
 
       input = {
@@ -169,8 +169,6 @@ in
         "SUPER, 6, workspace, 6"
         "SUPER, 7, workspace, 7"
         "SUPER, 8, workspace, 8"
-        "SUPER, 9, workspace, 9"
-        "SUPER, 0, workspace, 10"
 
         # Move window to workspace
         "SUPER SHIFT, 1, movetoworkspace, 1"
@@ -181,8 +179,6 @@ in
         "SUPER SHIFT, 6, movetoworkspace, 6"
         "SUPER SHIFT, 7, movetoworkspace, 7"
         "SUPER SHIFT, 8, movetoworkspace, 8"
-        "SUPER SHIFT, 9, movetoworkspace, 9"
-        "SUPER SHIFT, 0, movetoworkspace, 10"
 
         # Scroll through workspaces
         "SUPER, mouse_down, workspace, e+1"
@@ -502,6 +498,36 @@ in
   services.udiskie = {
     enable = true;
     tray = "auto";
+  };
+
+  # Firefox with declarative extensions via NUR
+  programs.firefox = {
+    enable = true;
+    profiles.nmorales = {
+      isDefault = true;
+      extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
+        ublock-origin
+        surfingkeys
+        ublacklist
+        simple-tab-groups
+      ];
+      settings = {
+        # Performance
+        "gfx.webrender.all" = true;
+        "media.ffmpeg.vaapi.enabled" = true; # Hardware video decode
+        # Privacy
+        "privacy.trackingprotection.enabled" = true;
+        "privacy.trackingprotection.socialtracking.enabled" = true;
+        # Disable telemetry
+        "datareporting.healthreport.uploadEnabled" = false;
+        "datareporting.policy.dataSubmissionEnabled" = false;
+        "toolkit.telemetry.enabled" = false;
+        "toolkit.telemetry.unified" = false;
+        # UI
+        "browser.tabs.closeWindowWithLastTab" = false;
+        "browser.toolbars.bookmarks.visibility" = "never";
+      };
+    };
   };
 
 }

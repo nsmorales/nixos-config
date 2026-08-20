@@ -13,6 +13,7 @@ _:
 
   # Browsers
   "google-chrome"
+  "firefox"
 
   # Communication Tools - Examples (uncomment as needed)
   # "discord"
