@@ -119,11 +119,12 @@ in
       dwindle = {
         pseudotile = true;
         preserve_split = true;
+        smart_split = false;
       };
 
       gestures = {
         workspace_swipe = true;
-        workspace_swipe_fingers = 3;
+        workspace_swipe_touch_fingers = 3;
       };
 
       misc = {
@@ -142,7 +143,7 @@ in
         "SUPER, F, fullscreen, 0"
         "SUPER SHIFT, F, togglefloating"
         "SUPER, P, pseudo"
-        "SUPER, J, togglesplit"
+        "SUPER, T, layoutmsg, togglesplit"
 
         # Screenshot
         ", Print, exec, grim -g \"$(slurp)\" - | wl-copy"
@@ -206,8 +207,8 @@ in
         ", XF86AudioPrev, exec, playerctl previous"
       ];
 
-      # Window rules
-      windowrulev2 = [
+      # Window rules (windowrule replaces deprecated windowrulev2)
+      windowrule = [
         "float, class:^(pavucontrol)$"
         "float, class:^(blueman-manager)$"
         "float, class:^(nm-connection-editor)$"
