@@ -117,14 +117,14 @@ in
       };
 
       dwindle = {
-        pseudotile = true;
         preserve_split = true;
-        smart_split = false;
+        smart_resizing = true;
+        force_split = 0;
       };
 
       gestures = {
-        workspace_swipe = true;
-        workspace_swipe_touch_fingers = 3;
+        workspace_swipe_touch = true;
+        workspace_swipe_touch_invert = false;
       };
 
       misc = {
@@ -142,7 +142,6 @@ in
         "SUPER SHIFT, E, exit"
         "SUPER, F, fullscreen, 0"
         "SUPER SHIFT, F, togglefloating"
-        "SUPER, P, pseudo"
         "SUPER, T, layoutmsg, togglesplit"
 
         # Screenshot
@@ -207,13 +206,13 @@ in
         ", XF86AudioPrev, exec, playerctl previous"
       ];
 
-      # Window rules (windowrule replaces deprecated windowrulev2)
+      # Window rules — windowrule matches class by default (no class: prefix)
       windowrule = [
-        "float, class:^(pavucontrol)$"
-        "float, class:^(blueman-manager)$"
-        "float, class:^(nm-connection-editor)$"
-        "center, class:^(pavucontrol)$"
-        "size 800 600, class:^(pavucontrol)$"
+        "float, ^(pavucontrol)$"
+        "float, ^(blueman-manager)$"
+        "float, ^(nm-connection-editor)$"
+        "center, ^(pavucontrol)$"
+        "size 800 600, ^(pavucontrol)$"
       ];
     };
   };
