@@ -116,6 +116,10 @@ let name = "%NAME%";
       };
       pull.rebase = true;
       rebase.autoStash = true;
+      # Use gh as the credential helper for GitHub.
+      # Run `gh auth login` once on a new machine to store the token
+      # in gh's own config (~/.config/gh/) — not in the read-only git config.
+      "credential.https://github.com".helper = "${pkgs.gh}/bin/gh auth git-credential";
     };
   };
 
