@@ -32,9 +32,6 @@ with pkgs; [
   nerd-fonts.jetbrains-mono
   nerd-fonts.noto
 
-  # Node.js development tools
-  nodejs_24
-
   # Text and terminal utilities
   ghostty
   alacritty  # Backup terminal emulator
@@ -75,4 +72,5 @@ with pkgs; [
   # Python packages
   python3
   virtualenv
+  uv
 ]

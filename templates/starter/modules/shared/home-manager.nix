@@ -235,9 +235,10 @@ let name = "%NAME%";
     settings = {
       font-family = "JetBrainsMono Nerd Font";
       font-size = lib.mkMerge [
-        (lib.mkIf pkgs.stdenv.hostPlatform.isLinux 11)
-        (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin 14)
+        (lib.mkIf pkgs.stdenv.hostPlatform.isLinux 16)
+        (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin 18)
       ];
+      font-feature = [ "calt" "liga" "dlig" ]; # ligatures
       window-decoration = false;
       cursor-style = "block";
       background-opacity = 0.95;
@@ -273,6 +274,70 @@ let name = "%NAME%";
         "14=#5fb3b3"
         "15=#d8dee9"
       ];
+    };
+  };
+
+  alacritty = {
+    enable = true;
+    settings = {
+      font = {
+        normal = {
+          family = "JetBrainsMono Nerd Font";
+          style = "Regular";
+        };
+        bold = {
+          family = "JetBrainsMono Nerd Font";
+          style = "Bold";
+        };
+        italic = {
+          family = "JetBrainsMono Nerd Font";
+          style = "Italic";
+        };
+        size = lib.mkMerge [
+          (lib.mkIf pkgs.stdenv.hostPlatform.isLinux 16)
+          (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin 18)
+        ];
+      };
+
+      # Alacritty uses harfbuzz for ligatures — enable via font features
+      # JetBrains Mono has ligatures built in, they work automatically
+
+      cursor.style = "Block";
+
+      window = {
+        opacity = 0.95;
+        padding = {
+          x = 16;
+          y = 16;
+        };
+      };
+
+      colors = {
+        primary = {
+          background = "#1f2528";
+          foreground = "#c0c5ce";
+        };
+        normal = {
+          black =   "#1f2528";
+          red =     "#ec5f67";
+          green =   "#99c794";
+          yellow =  "#fac863";
+          blue =    "#6699cc";
+          magenta = "#c594c5";
+          cyan =    "#5fb3b3";
+          white =   "#c0c5ce";
+        };
+        bright = {
+          black =   "#65737e";
+          red =     "#ec5f67";
+          green =   "#99c794";
+          yellow =  "#fac863";
+          blue =    "#6699cc";
+          magenta = "#c594c5";
+          cyan =    "#5fb3b3";
+          white =   "#d8dee9";
+        };
+      };
     };
   };
 

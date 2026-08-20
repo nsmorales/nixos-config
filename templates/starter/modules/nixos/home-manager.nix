@@ -92,12 +92,13 @@ in
           enabled = true;
           size = 6;
           passes = 2;
-          new_optimizations = true;
         };
-        drop_shadow = true;
-        shadow_range = 8;
-        shadow_render_power = 2;
-        "col.shadow" = "rgba(1a1a1aee)";
+        shadow = {
+          enabled = true;
+          range = 8;
+          render_power = 2;
+          color = "rgba(1a1a1aee)";
+        };
       };
 
       animations = {
