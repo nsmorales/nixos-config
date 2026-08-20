@@ -307,8 +307,8 @@ let name = "%NAME%";
       window = {
         opacity = 0.95;
         padding = {
-          x = 16;
-          y = 16;
+          x = 4;
+          y = 4;
         };
       };
 
