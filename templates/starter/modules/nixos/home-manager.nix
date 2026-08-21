@@ -4,6 +4,10 @@ let
   user = "nmorales";
   shared-files = import ../shared/files.nix { inherit config pkgs; };
 
+  lua = lib.generators.mkLuaInline;
+  hlBind = keys: dispatcher: { _args = [ keys (lua dispatcher) ]; };
+  hlBindFlags = keys: dispatcher: flags: { _args = [ keys (lua dispatcher) flags ]; };
+
 in
 {
   imports = [ ../shared/home-manager.nix ];
@@ -31,188 +35,232 @@ in
   };
 
   # Hyprland window manager (declarative config via home-manager)
+  # Lua config format (Hyprland 0.55+, hyprlang is deprecated)
+  # See: https://wiki.hypr.land/Configuring/Start/
   wayland.windowManager.hyprland = {
     enable = true;
-    # Pin to hyprlang (.conf) format. The new Lua format (default in HM 26.05)
-    # requires a completely different settings syntax — migrate when ready.
-    configType = "hyprlang";
+    configType = "lua";
     settings = {
       # Monitor configuration — adjust to your display
-      # See: https://wiki.hyprland.org/Configuring/Monitors/
-      monitor = [ ",preferred,auto,1" ];
+      # See: https://wiki.hypr.land/Configuring/Basics/Monitors/
+      monitor = [{
+        output = "";
+        mode = "preferred";
+        position = "auto";
+        scale = 1;
+      }];
 
       # Autostart
-      exec-once = [
-        "${pkgs.waybar}/bin/waybar"
-        "${pkgs.hyprpaper}/bin/hyprpaper"
-        "${pkgs.dunst}/bin/dunst"
-        "${pkgs.udiskie}/bin/udiskie --tray"
-        "${pkgs.networkmanagerapplet}/bin/nm-applet --indicator"
-      ];
+      # See: https://wiki.hypr.land/Configuring/Basics/Autostart/
+      on = {
+        _args = [
+          "hyprland.start"
+          (lua ''
+            function()
+              hl.exec_cmd("${pkgs.waybar}/bin/waybar")
+              hl.exec_cmd("${pkgs.hyprpaper}/bin/hyprpaper")
+              hl.exec_cmd("${pkgs.dunst}/bin/dunst")
+              hl.exec_cmd("${pkgs.udiskie}/bin/udiskie --tray")
+              hl.exec_cmd("${pkgs.networkmanagerapplet}/bin/nm-applet --indicator")
+            end
+          '')
+        ];
+      };
 
       # Environment variables for Wayland compatibility
+      # $VAR references require os.getenv() — no shell expansion in hl.env
       env = [
-        "XCURSOR_SIZE,24"
-        "XCURSOR_THEME,Adwaita"
-        "GDK_BACKEND,wayland,x11"
-        "QT_QPA_PLATFORM,wayland;xcb"
-        "SDL_VIDEODRIVER,wayland"
-        "CLUTTER_BACKEND,wayland"
-        "XDG_CURRENT_DESKTOP,Hyprland"
-        "XDG_SESSION_TYPE,wayland"
-        "XDG_SESSION_DESKTOP,Hyprland"
-        # Ensure Nix profile binaries and setuid wrappers (sudo) are in PATH
-        "PATH,\$HOME/.nix-profile/bin:/etc/profiles/per-user/nmorales/bin:/run/wrappers/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:\$PATH"
+        { _args = [ "XCURSOR_SIZE" "24" ]; }
+        { _args = [ "XCURSOR_THEME" "Adwaita" ]; }
+        { _args = [ "GDK_BACKEND" "wayland,x11" ]; }
+        { _args = [ "QT_QPA_PLATFORM" "wayland;xcb" ]; }
+        { _args = [ "SDL_VIDEODRIVER" "wayland" ]; }
+        { _args = [ "CLUTTER_BACKEND" "wayland" ]; }
+        { _args = [ "XDG_CURRENT_DESKTOP" "Hyprland" ]; }
+        { _args = [ "XDG_SESSION_TYPE" "wayland" ]; }
+        { _args = [ "XDG_SESSION_DESKTOP" "Hyprland" ]; }
+        {
+          # Ensure Nix profile binaries and setuid wrappers (sudo) are in PATH
+          _args = [
+            "PATH"
+            (lua ''
+              (os.getenv("HOME") or "") .. "/.nix-profile/bin:/etc/profiles/per-user/${user}/bin:/run/wrappers/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:" .. (os.getenv("PATH") or "")
+            '')
+          ];
+        }
       ];
 
-      input = {
-        kb_layout = "us";
-        kb_options = "ctrl:nocaps"; # Caps Lock → Ctrl
-        follow_mouse = 1;
-        sensitivity = 0;
-        touchpad = {
-          natural_scroll = true;
-          tap-to-click = true;
+      # Config variables
+      # See: https://wiki.hypr.land/Configuring/Basics/Variables/
+      config = {
+        input = {
+          kb_layout = "us";
+          kb_options = "ctrl:nocaps"; # Caps Lock → Ctrl
+          follow_mouse = 1;
+          sensitivity = 0;
+          touchpad = {
+            natural_scroll = true;
+            tap_to_click = true;
+          };
+        };
+
+        general = {
+          gaps_in = 4;
+          gaps_out = 8;
+          border_size = 2;
+          col = {
+            active_border = {
+              colors = [ "rgba(6699ccee)" "rgba(c594c5ee)" ];
+              angle = 45;
+            };
+            inactive_border = "rgba(65737e88)";
+          };
+          layout = "dwindle";
+          allow_tearing = false;
+        };
+
+        decoration = {
+          rounding = 8;
+          blur = {
+            enabled = true;
+            size = 6;
+            passes = 2;
+          };
+          shadow = {
+            enabled = true;
+            range = 8;
+            render_power = 2;
+            color = "rgba(1a1a1aee)";
+          };
+        };
+
+        animations.enabled = true;
+
+        dwindle = {
+          preserve_split = true;
+          smart_resizing = true;
+          force_split = 0;
+        };
+
+        gestures = {
+          workspace_swipe_touch = true;
+          workspace_swipe_touch_invert = false;
+        };
+
+        misc = {
+          force_default_wallpaper = 0;
+          disable_hyprland_logo = true;
         };
       };
 
-      general = {
-        gaps_in = 4;
-        gaps_out = 8;
-        border_size = 2;
-        "col.active_border" = "rgba(6699ccee) rgba(c594c5ee) 45deg";
-        "col.inactive_border" = "rgba(65737e88)";
-        layout = "dwindle";
-        allow_tearing = false;
-      };
+      # Animation curves
+      # See: https://wiki.hypr.land/Configuring/Advanced-and-Cool/Animations/
+      curve = [
+        {
+          _args = [
+            "easeOutCubic"
+            { type = "bezier"; points = [ [ 0.33 1 ] [ 0.68 1 ] ]; }
+          ];
+        }
+        {
+          _args = [
+            "easeInOutCubic"
+            { type = "bezier"; points = [ [ 0.65 0 ] [ 0.35 1 ] ]; }
+          ];
+        }
+      ];
 
-      decoration = {
-        rounding = 8;
-        blur = {
-          enabled = true;
-          size = 6;
-          passes = 2;
-        };
-        shadow = {
-          enabled = true;
-          range = 8;
-          render_power = 2;
-          color = "rgba(1a1a1aee)";
-        };
-      };
+      animation = [
+        { leaf = "windows"; enabled = true; speed = 4; bezier = "easeOutCubic"; }
+        { leaf = "windowsOut"; enabled = true; speed = 4; bezier = "easeOutCubic"; style = "popin 80%"; }
+        { leaf = "border"; enabled = true; speed = 10; bezier = "default"; }
+        { leaf = "fade"; enabled = true; speed = 4; bezier = "default"; }
+        { leaf = "workspaces"; enabled = true; speed = 4; bezier = "easeInOutCubic"; }
+      ];
 
-      animations = {
-        enabled = true;
-        bezier = [
-          "easeOutCubic, 0.33, 1, 0.68, 1"
-          "easeInOutCubic, 0.65, 0, 0.35, 1"
-        ];
-        animation = [
-          "windows, 1, 4, easeOutCubic"
-          "windowsOut, 1, 4, easeOutCubic, popin 80%"
-          "border, 1, 10, default"
-          "fade, 1, 4, default"
-          "workspaces, 1, 4, easeInOutCubic"
-        ];
-      };
-
-      dwindle = {
-        preserve_split = true;
-        smart_resizing = true;
-        force_split = 0;
-      };
-
-      gestures = {
-        workspace_swipe_touch = true;
-        workspace_swipe_touch_invert = false;
-      };
-
-      misc = {
-        force_default_wallpaper = 0;
-        disable_hyprland_logo = true;
-      };
-
+      # Keybinds
+      # See: https://wiki.hypr.land/Configuring/Basics/Binds/
       bind = [
         # Applications
-        "SUPER, Return, exec, ${pkgs.ghostty}/bin/ghostty"
-        "SUPER, Space, exec, ${pkgs.wofi}/bin/wofi --show drun"
-        "SUPER, E, exec, ${pkgs.ghostty}/bin/ghostty -e ${pkgs.yazi}/bin/yazi"
-        "SUPER, B, exec, firefox"
-        "SUPER SHIFT, Q, killactive"
-        "SUPER SHIFT, E, exit"
-        "SUPER, F, fullscreen, 0"
-        "SUPER SHIFT, F, togglefloating"
-        "SUPER, T, layoutmsg, togglesplit"
+        (hlBind "SUPER + Return" ''hl.dsp.exec_cmd("${pkgs.ghostty}/bin/ghostty")'')
+        (hlBind "SUPER + space" ''hl.dsp.exec_cmd("${pkgs.wofi}/bin/wofi --show drun")'')
+        (hlBind "SUPER + E" ''hl.dsp.exec_cmd("${pkgs.ghostty}/bin/ghostty -e ${pkgs.yazi}/bin/yazi")'')
+        (hlBind "SUPER + B" ''hl.dsp.exec_cmd("firefox")'')
+        (hlBind "SUPER + SHIFT + Q" "hl.dsp.window.close()")
+        (hlBind "SUPER + SHIFT + E" ''hl.dsp.exec_cmd("uwsm stop")'')
+        (hlBind "SUPER + F" "hl.dsp.window.fullscreen()")
+        (hlBind "SUPER + SHIFT + F" ''hl.dsp.window.float({ action = "toggle" })'')
+        (hlBind "SUPER + T" ''hl.dsp.layout("togglesplit")'')
 
         # Screenshot
-        ", Print, exec, grim -g \"$(slurp)\" - | wl-copy"
-        "SUPER SHIFT, S, exec, grim -g \"$(slurp)\" ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"
+        (hlBind "Print" ''hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | wl-copy")'')
+        (hlBind "SUPER + SHIFT + S" ''hl.dsp.exec_cmd("grim -g \"$(slurp)\" ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png")'')
 
         # Focus movement (vim-style)
-        "SUPER, H, movefocus, l"
-        "SUPER, L, movefocus, r"
-        "SUPER, K, movefocus, u"
-        "SUPER, J, movefocus, d"
+        (hlBind "SUPER + H" ''hl.dsp.focus({ direction = "l" })'')
+        (hlBind "SUPER + L" ''hl.dsp.focus({ direction = "r" })'')
+        (hlBind "SUPER + K" ''hl.dsp.focus({ direction = "u" })'')
+        (hlBind "SUPER + J" ''hl.dsp.focus({ direction = "d" })'')
 
         # Window movement
-        "SUPER SHIFT, H, movewindow, l"
-        "SUPER SHIFT, L, movewindow, r"
-        "SUPER SHIFT, K, movewindow, u"
-        "SUPER SHIFT, J, movewindow, d"
-
-        # Workspaces
-        "SUPER, 1, workspace, 1"
-        "SUPER, 2, workspace, 2"
-        "SUPER, 3, workspace, 3"
-        "SUPER, 4, workspace, 4"
-        "SUPER, 5, workspace, 5"
-        "SUPER, 6, workspace, 6"
-        "SUPER, 7, workspace, 7"
-        "SUPER, 8, workspace, 8"
-
-        # Move window to workspace
-        "SUPER SHIFT, 1, movetoworkspace, 1"
-        "SUPER SHIFT, 2, movetoworkspace, 2"
-        "SUPER SHIFT, 3, movetoworkspace, 3"
-        "SUPER SHIFT, 4, movetoworkspace, 4"
-        "SUPER SHIFT, 5, movetoworkspace, 5"
-        "SUPER SHIFT, 6, movetoworkspace, 6"
-        "SUPER SHIFT, 7, movetoworkspace, 7"
-        "SUPER SHIFT, 8, movetoworkspace, 8"
+        (hlBind "SUPER + SHIFT + H" ''hl.dsp.window.move({ direction = "l" })'')
+        (hlBind "SUPER + SHIFT + L" ''hl.dsp.window.move({ direction = "r" })'')
+        (hlBind "SUPER + SHIFT + K" ''hl.dsp.window.move({ direction = "u" })'')
+        (hlBind "SUPER + SHIFT + J" ''hl.dsp.window.move({ direction = "d" })'')
 
         # Scroll through workspaces
-        "SUPER, mouse_down, workspace, e+1"
-        "SUPER, mouse_up, workspace, e-1"
-      ];
+        (hlBind "SUPER + mouse_down" ''hl.dsp.focus({ workspace = "e+1" })'')
+        (hlBind "SUPER + mouse_up" ''hl.dsp.focus({ workspace = "e-1" })'')
 
-      # Mouse binds
-      bindm = [
-        "SUPER, mouse:272, movewindow"
-        "SUPER, mouse:273, resizewindow"
-      ];
+        # Move/resize windows with SUPER + LMB/RMB drag
+        (hlBindFlags "SUPER + mouse:272" "hl.dsp.window.drag()" { mouse = true; })
+        (hlBindFlags "SUPER + mouse:273" "hl.dsp.window.resize()" { mouse = true; })
 
-      # Media / volume keys
-      bindel = [
-        ", XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
-        ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-        ", XF86MonBrightnessUp, exec, brightnessctl set 10%+"
-        ", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
-      ];
+        # Media / volume keys (locked = active on lockscreen, repeating = repeat while held)
+        (hlBindFlags "XF86AudioRaiseVolume"
+          ''hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+")''
+          { locked = true; repeating = true; })
+        (hlBindFlags "XF86AudioLowerVolume"
+          ''hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-")''
+          { locked = true; repeating = true; })
+        (hlBindFlags "XF86MonBrightnessUp"
+          ''hl.dsp.exec_cmd("brightnessctl set 10%+")''
+          { locked = true; repeating = true; })
+        (hlBindFlags "XF86MonBrightnessDown"
+          ''hl.dsp.exec_cmd("brightnessctl set 10%-")''
+          { locked = true; repeating = true; })
 
-      bindl = [
-        ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-        ", XF86AudioPlay, exec, playerctl play-pause"
-        ", XF86AudioNext, exec, playerctl next"
-        ", XF86AudioPrev, exec, playerctl previous"
-      ];
+        (hlBindFlags "XF86AudioMute"
+          ''hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")''
+          { locked = true; })
+        (hlBindFlags "XF86AudioPlay"
+          ''hl.dsp.exec_cmd("playerctl play-pause")''
+          { locked = true; })
+        (hlBindFlags "XF86AudioNext"
+          ''hl.dsp.exec_cmd("playerctl next")''
+          { locked = true; })
+        (hlBindFlags "XF86AudioPrev"
+          ''hl.dsp.exec_cmd("playerctl previous")''
+          { locked = true; })
+      ]
+      ++ (map
+        (n: hlBind "SUPER + ${toString n}" "hl.dsp.focus({ workspace = ${toString n} })")
+        (lib.range 1 8))
+      ++ (map
+        (n: hlBind "SUPER + SHIFT + ${toString n}" "hl.dsp.window.move({ workspace = ${toString n} })")
+        (lib.range 1 8));
 
-      # Window rules — new format: "effect arg, match:class ^(regex)$"
-      windowrule = [
-        "float on, match:class ^(pavucontrol)$"
-        "float on, match:class ^(blueman-manager)$"
-        "float on, match:class ^(nm-connection-editor)$"
-        "center on, match:class ^(pavucontrol)$"
-        "size 800 600, match:class ^(pavucontrol)$"
+      # Window rules
+      # See: https://wiki.hypr.land/Configuring/Basics/Window-Rules/
+      window_rule = [
+        {
+          match.class = "^pavucontrol$";
+          float = true;
+          center = true;
+          size = [ 800 600 ];
+        }
+        { match.class = "^blueman-manager$"; float = true; }
+        { match.class = "^nm-connection-editor$"; float = true; }
       ];
     };
   };
