@@ -50,6 +50,17 @@ in
     # My shell
     zsh.enable = true;
 
+    # Run precompiled, non-Nix binaries (e.g. mise-installed tools)
+    nix-ld = {
+      enable = true;
+      libraries = with pkgs; [
+        stdenv.cc.cc.lib
+        openssl
+        zlib
+        ncurses
+      ];
+    };
+
     # Hyprland compositor
     hyprland = {
       enable = true;

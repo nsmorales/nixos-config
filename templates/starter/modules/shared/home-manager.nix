@@ -99,9 +99,30 @@ in
           kubectl get events --field-selector involvedObject.name="$1"
         }
 
-        # K8s editor
-        export KUBE_EDITOR=nvim
-      '';
+         # K8s editor
+         export KUBE_EDITOR=nvim
+       '';
+     };
+
+    # Version manager for programming languages.
+    # Declarative tools land in ~/.config/mise/conf.d/50-home-manager.toml (read-only),
+    # while ~/.config/mise/config.toml stays writable so `mise use -g` keeps working.
+    # Tools are downloaded at first activation/use, not at build time.
+    mise = {
+      enable = true;
+      enableZshIntegration = true;
+      enableMutableConfig = true;
+      globalConfig = {
+        tools = {
+          # Erlang/Elixir come from nixpkgs beam packages (see packages.nix)
+          clojure = "1.12.5";
+        };
+        settings = {
+          yes = true;
+          # Use precompiled binaries instead of source builds (requires nix-ld on NixOS)
+          all_compile = false;
+        };
+      };
     };
 
     git = {

@@ -62,6 +62,23 @@ with pkgs; [
   cargo
   openjdk
 
+  # BEAM languages (Erlang/OTP 29 + Elixir from the same set, plus LSP)
+  beam.packages.erlang_29.erlang
+  beam.packages.erlang_29.elixir_1_20
+  beam.packages.erlang_29.elixir-ls
+
+  # Build tools for source compiles
+  autoconf
+  automake
+  libtool
+  m4
+  pkg-config
+  gcc
+  gnumake
+  openssl
+  # hiPrio so buildEnv resolves the terminfo/g/ghostty collision with the ghostty package
+  (pkgs.lib.hiPrio ncurses)
+
   # Python packages
   python3
   virtualenv

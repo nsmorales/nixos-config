@@ -27,6 +27,17 @@ in
   programs = {
     gnupg.agent.enable = true;
     zsh.enable = true;
+
+    # Run precompiled, non-Nix binaries (e.g. mise-installed tools)
+    nix-ld = {
+      enable = true;
+      libraries = with pkgs; [
+        stdenv.cc.cc.lib
+        openssl
+        zlib
+        ncurses
+      ];
+    };
   };
 
   # SSH for connecting to WSL from Windows or remote
