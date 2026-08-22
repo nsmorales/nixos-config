@@ -281,7 +281,7 @@ in
         (n: hlBind "SUPER + ${toString n}" "hl.dsp.focus({ workspace = ${toString n} })")
         (lib.range 1 8))
       ++ (map
-        (n: hlBind "CTLR + ${toString n}" "hl.dsp.focus({ workspace = ${toString n} })")
+        (n: hlBind "CTRL + ${toString n}" "hl.dsp.focus({ workspace = ${toString n} })")
         (lib.range 1 8))
       ++ (map
         (n: hlBind "SUPER + SHIFT + ${toString n}" "hl.dsp.window.move({ workspace = ${toString n} })")
@@ -353,17 +353,16 @@ in
           all-outputs = true;
           format = "{icon}";
           format-icons = {
-            "1" = nf "f120"; # terminal
-            "2" = nf "f268"; # browser
-            "3" = nf "f121"; # code
-            "4" = nf "f07b"; # folder
-            "5" = nf "f001"; # music
-            "6" = nf "e70f"; # mail? fallback below if missing
+            "1" = nf "f269"; # browser (firefox)
+            "2" = nf "f120"; # terminal
+            "3" = nf "f121"; # editors (code)
+            "4" = nf "f268"; # browser (chrome)
+            "5" = nf "f07b"; # file (folder)
+            "6" = nf "f0e0"; # email (envelope)
             "7" = nf "f0f3"; # bell
             "8" = nf "f064"; # share
             urgent = nf "f06a"; # exclamation circle
-            active = nf "f111"; # filled circle
-            default = nf "f10c"; # hollow circle
+            default = nf "f10c"; # hollow circle (workspaces without a mapping)
           };
         };
 
