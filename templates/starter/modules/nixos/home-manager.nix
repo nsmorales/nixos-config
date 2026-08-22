@@ -2,11 +2,19 @@
 
 let
   user = "nmorales";
+
+  # External monitor matched by description (see `hyprctl monitors all`)
+  mainMonitorDesc = "Samsung Electric Company LC34G55T H1AK500000";
+
   shared-files = import ../shared/files.nix { inherit config pkgs; };
 
   lua = lib.generators.mkLuaInline;
   hlBind = keys: dispatcher: { _args = [ keys (lua dispatcher) ]; };
   hlBindFlags = keys: dispatcher: flags: { _args = [ keys (lua dispatcher) flags ]; };
+
+  # Nerd Font icon by unicode codepoint (keeps this file ASCII-only).
+  # Browse icons at https://www.nerdfonts.com/cheat-sheet
+  nf = hex: builtins.fromJSON ''"\u${hex}"'';
 
 in
 {
@@ -41,31 +49,57 @@ in
     enable = true;
     configType = "lua";
     settings = {
-      # Monitor configuration — adjust to your display
+      # Monitor configuration — external (matched by description) is primary at 0x0;
+      # everything else (laptop panel) extends to its right. When the external is
+      # absent, the fallback rule applies and the panel sits at 0x0.
       # See: https://wiki.hypr.land/Configuring/Basics/Monitors/
-      monitor = [{
-        output = "";
-        mode = "preferred";
-        position = "auto";
-        scale = 1;
-      }];
+      monitor = [
+        {
+          output = "desc:${mainMonitorDesc}";
+          mode = "3440x1440@59.97";
+          position = "0x0";
+          scale = 1;
+        }
+        {
+          output = "";
+          mode = "preferred";
+          position = "auto-right";
+          scale = 1;
+        }
+      ];
 
-      # Autostart
+      # Autostart + monitor hotplug. Each list entry becomes an hl.on(...) call;
+      # apply_main_monitor is defined in extraConfig below.
       # See: https://wiki.hypr.land/Configuring/Basics/Autostart/
-      on = {
-        _args = [
-          "hyprland.start"
-          (lua ''
-            function()
-              hl.exec_cmd("${pkgs.waybar}/bin/waybar")
-              hl.exec_cmd("${pkgs.hyprpaper}/bin/hyprpaper")
-              hl.exec_cmd("${pkgs.dunst}/bin/dunst")
-              hl.exec_cmd("${pkgs.udiskie}/bin/udiskie --tray")
-              hl.exec_cmd("${pkgs.networkmanagerapplet}/bin/nm-applet --indicator")
-            end
-          '')
-        ];
-      };
+      on = [
+        {
+          _args = [
+            "hyprland.start"
+            (lua ''
+              function()
+                hl.exec_cmd("${pkgs.waybar}/bin/waybar")
+                hl.exec_cmd("${pkgs.hyprpaper}/bin/hyprpaper")
+                hl.exec_cmd("${pkgs.dunst}/bin/dunst")
+                hl.exec_cmd("${pkgs.udiskie}/bin/udiskie --tray")
+                hl.exec_cmd("${pkgs.networkmanagerapplet}/bin/nm-applet --indicator")
+                apply_main_monitor()
+              end
+            '')
+          ];
+        }
+        {
+          _args = [
+            "monitor.added"
+            (lua ''function() apply_main_monitor() end'')
+          ];
+        }
+        {
+          _args = [
+            "monitor.removed"
+            (lua ''function() apply_main_monitor() end'')
+          ];
+        }
+      ];
 
       # Environment variables for Wayland compatibility
       # $VAR references require os.getenv() — no shell expansion in hl.env
@@ -247,6 +281,9 @@ in
         (n: hlBind "SUPER + ${toString n}" "hl.dsp.focus({ workspace = ${toString n} })")
         (lib.range 1 8))
       ++ (map
+        (n: hlBind "CTLR + ${toString n}" "hl.dsp.focus({ workspace = ${toString n} })")
+        (lib.range 1 8))
+      ++ (map
         (n: hlBind "SUPER + SHIFT + ${toString n}" "hl.dsp.window.move({ workspace = ${toString n} })")
         (lib.range 1 8));
 
@@ -263,6 +300,29 @@ in
         { match.class = "^nm-connection-editor$"; float = true; }
       ];
     };
+
+    # Appended after the generated settings; globals resolve at call time,
+    # so the hl.on handlers above can reference it.
+    extraConfig = ''
+      -- Promote the external monitor (matched by description) to main:
+      -- move every workspace onto it and focus it. No-op when disconnected.
+      function apply_main_monitor()
+        local main
+        for _, m in pairs(hl.get_monitors()) do
+          if m.description and m.description:find("${mainMonitorDesc}", 1, true) then
+            main = m
+            break
+          end
+        end
+        if not main then
+          return
+        end
+        for _, ws in pairs(hl.get_workspaces()) do
+          hl.dispatch(hl.dsp.workspace.move({ workspace = ws, monitor = main }))
+        end
+        hl.dispatch(hl.dsp.focus({ monitor = main }))
+      end
+    '';
   };
 
   programs = {
@@ -273,8 +333,8 @@ in
       settings = [{
         layer = "top";
         position = "top";
-        height = 32;
-        spacing = 4;
+        height = 34;
+        spacing = 0;
 
         modules-left = [ "hyprland/workspaces" "hyprland/submap" ];
         modules-center = [ "hyprland/window" ];
@@ -293,28 +353,31 @@ in
           all-outputs = true;
           format = "{icon}";
           format-icons = {
-            "1" = "";
-            "2" = "";
-            "3" = "";
-            "4" = "";
-            "5" = "";
-            urgent = "";
-            active = "";
-            default = "";
+            "1" = nf "f120"; # terminal
+            "2" = nf "f268"; # browser
+            "3" = nf "f121"; # code
+            "4" = nf "f07b"; # folder
+            "5" = nf "f001"; # music
+            "6" = nf "e70f"; # mail? fallback below if missing
+            "7" = nf "f0f3"; # bell
+            "8" = nf "f064"; # share
+            urgent = nf "f06a"; # exclamation circle
+            active = nf "f111"; # filled circle
+            default = nf "f10c"; # hollow circle
           };
         };
 
         "hyprland/window" = {
-          max-length = 60;
+          max-length = 50;
         };
 
         cpu = {
-          format = " {usage}%";
+          format = "${nf "f2db"} {usage}%"; # chip
           tooltip = false;
         };
 
         memory = {
-          format = " {}%";
+          format = "${nf "f0a0"} {percentage}%"; # disk/stack
         };
 
         battery = {
@@ -323,97 +386,212 @@ in
             critical = 15;
           };
           format = "{icon} {capacity}%";
-          format-charging = " {capacity}%";
-          format-plugged = " {capacity}%";
-          format-icons = [ "" "" "" "" "" ];
+          format-charging = "${nf "f0e7"} {capacity}%"; # bolt
+          format-plugged = "${nf "f0e7"} {capacity}%";
+          format-icons = [
+            (nf "f244") # empty
+            (nf "f243") # quarter
+            (nf "f242") # half
+            (nf "f241") # three-quarters
+            (nf "f240") # full
+          ];
         };
 
         network = {
-          format-wifi = " {essid} ({signalStrength}%)";
-          format-ethernet = " {ifname}";
-          format-disconnected = "⚠ Disconnected";
+          format-wifi = "${nf "f1eb"} {essid} ({signalStrength}%)"; # wifi
+          format-ethernet = "${nf "f0ac"} {ifname}"; # globe
+          format-disconnected = "${nf "f127"} Disconnected"; # broken link
           tooltip-format = "{ifname}: {ipaddr}/{cidr}";
         };
 
         pulseaudio = {
           format = "{icon} {volume}%";
-          format-muted = " Muted";
+          format-muted = "${nf "f026"} Muted"; # volume-off
           format-icons = {
-            default = [ "" "" "" ];
+            default = [
+              (nf "f026") # volume-off
+              (nf "f027") # volume-down
+              (nf "f028") # volume-up
+            ];
           };
           on-click = "pavucontrol";
         };
 
         clock = {
-          format = " {:%H:%M}";
-          format-alt = " {:%A, %B %d, %Y}";
+          format = "${nf "f017"} {:%H:%M}"; # clock
+          format-alt = "${nf "f017"} {:%A, %B %d, %Y}";
           tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
         };
 
         tray = {
           spacing = 8;
+          icon-size = 14;
         };
       }];
 
       style = ''
         * {
-          font-family: "JetBrainsMono Nerd Font", "Font Awesome 6 Free";
+          font-family: "JetBrainsMono Nerd Font", "Font Awesome 7 Free";
           font-size: 13px;
           min-height: 0;
         }
 
         window#waybar {
-          background-color: rgba(31, 37, 40, 0.92);
+          background-color: rgba(31, 37, 40, 0.9);
           color: #c0c5ce;
-          border-bottom: 2px solid rgba(102, 153, 204, 0.5);
+          border-bottom: 2px solid rgba(102, 153, 204, 0.35);
+        }
+
+        #workspaces {
+          background: rgba(101, 115, 126, 0.12);
+          margin: 5px 0 5px 10px;
+          padding: 0 4px;
+          border-radius: 12px;
         }
 
         #workspaces button {
-          padding: 0 8px;
+          padding: 0 6px;
+          min-width: 20px;
           color: #65737e;
           background: transparent;
           border: none;
+          border-radius: 10px;
         }
 
-        #workspaces button.active {
-          color: #6699cc;
-          background: rgba(102, 153, 204, 0.15);
-          border-bottom: 2px solid #6699cc;
-        }
-
-        #workspaces button.urgent {
-          color: #ec5f67;
-        }
-
-        #clock,
-        #battery,
-        #cpu,
-        #memory,
-        #network,
-        #pulseaudio,
-        #tray,
-        #submap {
-          padding: 0 12px;
+        #workspaces button:hover {
+          background: rgba(102, 153, 204, 0.18);
           color: #c0c5ce;
         }
 
-        #battery.warning {
+        #workspaces button.active {
+          color: #1f2528;
+          background: #6699cc;
+        }
+
+        #workspaces button.urgent {
+          color: #1f2528;
+          background: #ec5f67;
+        }
+
+        #submap {
           color: #fac863;
-        }
-
-        #battery.critical {
-          color: #ec5f67;
-          animation: blink 0.5s steps(1) infinite;
-        }
-
-        @keyframes blink {
-          to { color: #1f2528; background-color: #ec5f67; }
+          margin: 0 8px;
         }
 
         #window {
           color: #99c794;
+          font-weight: bold;
+          margin: 0 12px;
+        }
+
+        #pulseaudio,
+        #network,
+        #cpu,
+        #memory,
+        #battery,
+        #clock {
+          margin: 5px 0;
+          padding: 0 12px;
+          border-radius: 12px;
+        }
+
+        #pulseaudio {
+          color: #5fb3b3;
+          background: rgba(95, 179, 179, 0.10);
+        }
+
+        #network {
+          color: #c594c5;
+          background: rgba(197, 148, 197, 0.10);
+        }
+
+        #network.disconnected {
+          color: #ec5f67;
+          background: rgba(236, 95, 103, 0.10);
+        }
+
+        #cpu {
+          color: #fac863;
+          background: rgba(250, 200, 99, 0.10);
+        }
+
+        #memory {
+          color: #f99157;
+          background: rgba(249, 145, 87, 0.10);
+        }
+
+        #battery {
+          color: #99c794;
+          background: rgba(153, 199, 148, 0.10);
+        }
+
+        #battery.charging {
+          color: #fac863;
+        }
+
+        #battery.warning {
+          color: #1f2528;
+          background: #fac863;
+        }
+
+        #battery.critical {
+          color: #1f2528;
+          background: #ec5f67;
+          animation: blink 0.5s steps(1) infinite;
+        }
+
+        @keyframes blink {
+          to { color: #ec5f67; background-color: #1f2528; }
+        }
+
+        #clock {
+          color: #6699cc;
+          background: rgba(102, 153, 204, 0.10);
+          font-weight: bold;
+        }
+
+        #tray {
+          margin: 5px 10px 5px 8px;
+          padding: 0 6px;
         }
       '';
+    };
+
+    # Foot — lightweight Wayland terminal
+    foot = {
+      enable = true;
+      settings = {
+        main = {
+          font = "JetBrainsMono Nerd Font:size=11";
+          dpi-aware = "no";
+          pad = "6x6 center";
+        };
+        cursor.style = "beam";
+        colors = {
+          alpha = 0.95;
+          background = "1b2b34";
+          foreground = "c0c5ce";
+          regular0 = "1b2b34";
+          regular1 = "ec5f67";
+          regular2 = "99c794";
+          regular3 = "fac863";
+          regular4 = "6699cc";
+          regular5 = "c594c5";
+          regular6 = "5fb3b3";
+          regular7 = "c0c5ce";
+          bright0 = "65737e";
+          bright1 = "f99157";
+          bright2 = "99c794";
+          bright3 = "fac863";
+          bright4 = "6699cc";
+          bright5 = "c594c5";
+          bright6 = "5fb3b3";
+          bright7 = "ffffff";
+          selection-background = "4f5b66";
+          selection-foreground = "c0c5ce";
+          urls = "6699cc";
+        };
+      };
     };
 
     # wofi launcher
