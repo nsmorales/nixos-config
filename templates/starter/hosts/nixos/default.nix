@@ -109,10 +109,15 @@ in
     # Unmapped Super combos pass through to Hyprland unchanged.
     keyd = {
       enable = true;
-      keyboards.default.settings.meta = {
-        v = "C-v"; # paste
-        c = "C-c"; # copy
-        x = "C-x"; # cut
+      keyboards.default = {
+        # Exclude Mouseless virtual devices (vendor 736e) — grabbing them
+        # creates a feedback loop that makes the keyboard unresponsive.
+        ids = [ "*" "-736e" ];
+        settings.meta = {
+          v = "C-v"; # paste
+          c = "C-c"; # copy
+          x = "C-x"; # cut
+        };
       };
     };
 
