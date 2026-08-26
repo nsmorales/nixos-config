@@ -82,6 +82,7 @@ in
                 hl.exec_cmd("${pkgs.dunst}/bin/dunst")
                 hl.exec_cmd("${pkgs.udiskie}/bin/udiskie --tray")
                 hl.exec_cmd("${pkgs.networkmanagerapplet}/bin/nm-applet --indicator")
+                hl.exec_cmd("${pkgs.flatpak}/bin/flatpak run net.sonuscape.mouseless")
                 apply_main_monitor()
               end
             '')
@@ -298,10 +299,20 @@ in
           center = true;
           size = [ 800 600 ];
         }
-        { match.class = "^blueman-manager$"; float = true; }
-        { match.class = "^nm-connection-editor$"; float = true; }
-      ];
-    };
+         { match.class = "^blueman-manager$"; float = true; }
+         { match.class = "^nm-connection-editor$"; float = true; }
+       ];
+
+       # Layer rules
+       # Mouseless overlay: appear instantly instead of fading in
+       layer_rule = [
+         {
+           name = "mouseless-noanim";
+           match.namespace = "^mouseless-overlay$";
+           no_anim = true;
+         }
+       ];
+     };
 
     # Appended after the generated settings; globals resolve at call time,
     # so the hl.on handlers above can reference it.
