@@ -221,7 +221,9 @@ in
         (hlBind "SUPER + E" ''hl.dsp.exec_cmd("${pkgs.ghostty}/bin/ghostty -e ${pkgs.yazi}/bin/yazi")'')
         (hlBind "SUPER + B" ''hl.dsp.exec_cmd("firefox")'')
         (hlBind "SUPER + SHIFT + Q" "hl.dsp.window.close()")
-        (hlBind "SUPER + SHIFT + E" ''hl.dsp.exec_cmd("uwsm stop")'')
+        # Logout: session is launched by greetd (not uwsm-managed), so exit via
+        # hyprctl using the upstream Lua-config dispatcher idiom.
+        (hlBind "SUPER + SHIFT + E" ''hl.dsp.exec_cmd("hyprctl dispatch 'hl.dsp.exit()'")'')
         (hlBind "SUPER + F" "hl.dsp.window.fullscreen()")
         (hlBind "SUPER + SHIFT + F" ''hl.dsp.window.float({ action = "toggle" })'')
         (hlBind "SUPER + T" ''hl.dsp.layout("togglesplit")'')

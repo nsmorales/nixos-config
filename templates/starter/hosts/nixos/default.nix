@@ -10,6 +10,7 @@ in
   imports = [
     ./hardware-configuration.nix
     ../../modules/shared
+    ../../modules/nixos/mouseless.nix
     # disk-config.nix is used only during fresh installs via the install script (disko).
     # Do not import it here — it conflicts with hardware-configuration.nix on running systems.
   ];
@@ -183,7 +184,8 @@ in
         "networkmanager"
         "video"
         "audio"
-        "input"
+        "input" # Input device access (Mouseless)
+        "uinput" # Virtual input device creation (Mouseless)
       ];
       shell = pkgs.zsh;
       openssh.authorizedKeys.keys = sshKeys;
