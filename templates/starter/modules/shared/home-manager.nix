@@ -274,6 +274,12 @@ in
         background = "#1f2528";
         foreground = "#c0c5ce";
 
+        # Paste with Ctrl+V on Linux (keyd translates Super+V to Ctrl+V;
+        # default Ctrl+V is verbatim-insert in terminals). macOS uses Cmd+V.
+        keybind = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+          "ctrl+v=clipboard_paste"
+        ];
+
         # Padding
         window-padding-x = 16;
         window-padding-y = 16;
@@ -332,6 +338,12 @@ in
         # JetBrains Mono has ligatures built in, they work automatically
 
         cursor.style = "Block";
+
+        # Paste with Ctrl+V on Linux (keyd translates Super+V to Ctrl+V).
+        # macOS uses native Cmd+V.
+        keyboard.bindings = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+          { key = "V"; mods = "Control"; action = "Paste"; }
+        ];
 
         window = {
           opacity = 0.95;

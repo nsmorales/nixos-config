@@ -103,6 +103,18 @@ in
     # Better support for general peripherals
     libinput.enable = true;
 
+    # Key remapping service
+    # Super+C/X/V → Ctrl+C/X/V system-wide (copy/cut/paste in any app).
+    # Unmapped Super combos pass through to Hyprland unchanged.
+    keyd = {
+      enable = true;
+      keyboards.default.settings.meta = {
+        v = "C-v"; # paste
+        c = "C-c"; # copy
+        x = "C-x"; # cut
+      };
+    };
+
     # Let's be able to SSH into this machine
     openssh.enable = true;
 

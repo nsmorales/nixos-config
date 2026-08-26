@@ -566,6 +566,9 @@ in
           pad = "6x6 center";
         };
         cursor.style = "beam";
+
+        # Paste with Ctrl+V (keyd translates Super+V to Ctrl+V)
+        bindings."ctrl+v" = "clipboard-paste";
         colors = {
           alpha = 0.95;
           background = "1b2b34";
