@@ -50,6 +50,10 @@ in
     isNormalUser = true;
     extraGroups = [ "wheel" "docker" ];
     shell = pkgs.zsh;
+    # Keep the user manager (user@1000) and its D-Bus session bus running
+    # so `switch-to-configuration` and home-manager activation work in WSL,
+    # which has no graphical login session.
+    linger = true;
   };
 
   # Docker for development
