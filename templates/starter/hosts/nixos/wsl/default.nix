@@ -18,6 +18,9 @@ in
     # nativeSystemd is always enabled in newer nixos-wsl
   };
 
+  # Puerto Rico (Atlantic Standard Time, UTC-4, no DST)
+  time.timeZone = "America/Puerto_Rico";
+
   # Nix settings (caches, keys, features, users) are defined in modules/shared
 
   # No bootloader — Windows handles booting

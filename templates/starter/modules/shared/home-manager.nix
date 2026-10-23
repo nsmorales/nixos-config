@@ -111,7 +111,7 @@ in
     mise = {
       enable = true;
       enableZshIntegration = true;
-      enableMutableConfig = true;
+      mutableSettings = true;
       globalConfig = {
         tools = {
           # Erlang/Elixir come from nixpkgs beam packages (see packages.nix)
@@ -442,7 +442,7 @@ in
           plugin = continuum;
           extraConfig = ''
             set -g @continuum-restore 'on'
-            set -g @continuum-save-interval '5'
+            set -g @continuum-save-interval '1'
           '';
         }
       ];
