@@ -1,9 +1,9 @@
 { config, pkgs, lib, ... }:
 
 let
-  name = "%NAME%";
+  name = "Norman Morales";
   user = "nmorales";
-  email = "%EMAIL%";
+  email = "nsmorales@users.noreply.github.com";
 in
 {
   # This module is imported by each platform's home-manager configuration
